@@ -1,35 +1,46 @@
 import Logger from "../logger";
+import MyErrorTypes from "./MyErrorTypes";
 
 export default class MyError extends Error {
+  public errorType: MyErrorTypes;
   public message: any;
-  public name: string;
-  public sendWithResponse: boolean = true;
-  constructor(message: string, name?: string) {
+
+  constructor(errorType?: MyErrorTypes, message?: string) {
     super(message);
-    this.message = message;
-    this.name = name || this.constructor.name;
+    this.message = message || "";
+    this.errorType = errorType || MyErrorTypes.UNKNOWN;
     Error.captureStackTrace(this, this.constructor);
   }
 
   private static createErrorWithMessage(
-    message: string,
-    name?: string
+    message?: string,
+    errorType?: MyErrorTypes
   ): MyError {
-    return new MyError(message, name);
+    return new MyError(errorType, message);
   }
 
-  private static createErrorWithErrorObject(error: Error): MyError {
-    return new MyError(error.message, error.name);
+  private static createErrorWithErrorObject(
+    error: Error,
+    errorType?: MyErrorTypes
+  ): MyError {
+    return new MyError(errorType || MyErrorTypes.UNKNOWN, error.message);
   }
 
-  static createError(error: Error | string, name?: string): MyError {
+  static createError(errorType: MyErrorTypes, error?: Error | string): MyError {
     if (typeof error === "string") {
-      return this.createErrorWithMessage(error, name);
-    } else {
-      return this.createErrorWithErrorObject(error);
+      return this.createErrorWithMessage(error, errorType);
+    } else if (error instanceof Error) {
+      return this.createErrorWithErrorObject(error, errorType);
+    } else if (errorType) {
+      return this.createErrorWithMessage(errorType.toString(), errorType);
     }
+
+    return this.createErrorWithMessage("Unknown error", MyErrorTypes.UNKNOWN);
   }
 
+  public toString() {
+    return this.errorType.toString() || this.message;
+  }
   log() {
     Logger.error(this.message);
   }

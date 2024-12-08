@@ -8,6 +8,6 @@ import esbuild from "esbuild";
     allowOverwrite: true,
     packages: "external",
     target: "node20",
-    format: "cjs",
+    bundle: true,
   });
 })();

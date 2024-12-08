@@ -23,5 +23,6 @@ UserRole.init(
     paranoid: false,
     timestamps: false,
     tableName: "UserRoleTable",
+    schema: "authentication",
   }
 );

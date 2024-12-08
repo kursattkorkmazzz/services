@@ -6,6 +6,9 @@ import DefineAssociation from "./utils/database/initialize_associations";
 import { InitializeDatabase } from "./utils/database/initialize_database";
 import AuthenticationRoute from "./routes/AuthenticationRoutes";
 import AuthorizationRoute from "./routes/AuthorizationRoutes";
+import MyError from "./utils/error/MyError";
+import MyResponse from "./utils/response/MyResponse";
+import MyErrorTypes from "./utils/error/MyErrorTypes";
 const port: number = process.env.PORT ? parseInt(process.env.PORT) : 3000; // default port to listen
 const app = express();
 
@@ -22,13 +25,30 @@ const app = express();
 
   // Default error handler.
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    Logger.error(err.message);
+    if (err instanceof MyError) {
+      res
+        .status(400)
+        .send(
+          MyResponse.createResponse(
+            null,
+            err.message || err.errorType.toString()
+          )
+        );
+      return;
+    } else {
+      Logger.error(err);
+    }
+
     res.sendStatus(500);
   });
+
   // All other routes return 401 - Not Authorized
-  app.use("*", (req, res) => {
-    res.status(401).send();
-  });
+  app.use(
+    "*",
+    (err: Error, req: Request, res: Response, next: NextFunction) => {
+      res.status(401);
+    }
+  );
 
   // start the Express server
   const server: Server = app.listen(port, () => {

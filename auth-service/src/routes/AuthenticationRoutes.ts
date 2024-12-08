@@ -1,25 +1,19 @@
-import CheckCredential from "@/controllers/authentication-controller/check-credential";
-import CreateToken from "@/controllers/authentication-controller/create-token";
-import CreateUser, {
-  CreateUserDataType,
-} from "@/controllers/authentication-controller/create-user";
-import GetNewAccessToken from "@/controllers/authentication-controller/get-access-token";
-import Logout from "@/controllers/authentication-controller/logout";
-import PasswordBasedAuth from "@/database/models/authentication_types/PasswordBasedAuth";
-
+import AuthenticationController from "@/controllers/authentication-controller/AuthenticationController";
 import MyError from "@/utils/error/MyError";
+import MyErrorTypes from "@/utils/error/MyErrorTypes";
 import { jwtDecode } from "@/utils/jwt";
 import Logger from "@/utils/logger";
 import MyResponse from "@/utils/response/MyResponse";
 import express, { NextFunction, Request, Response } from "express";
 import { JsonWebTokenError } from "jsonwebtoken";
+import { ForeignKeyConstraintError } from "sequelize";
 
 const AuthenticationRoute = express.Router();
 
 AuthenticationRoute.post(
   "/register",
   async (req: Request, res: Response, next: NextFunction) => {
-    const data: CreateUserDataType = req.body;
+    const data = req.body;
 
     if (!data.username) {
       res
@@ -33,7 +27,6 @@ AuthenticationRoute.post(
         .send(MyResponse.createResponse(null, "Password is required"));
       return;
     }
-
     if (!data.firstname) {
       res
         .status(400)
@@ -54,12 +47,15 @@ AuthenticationRoute.post(
     }
 
     try {
-      await CreateUser(data);
-      res
-        .status(200)
-        .send(MyResponse.createResponse("user is created, successfully", null));
+      await AuthenticationController.Register({
+        firstname: data.firstname,
+        lastname: data.lastname,
+        email: data.email,
+        username: data.username,
+        password: data.password,
+      });
+      res.status(200).send(MyResponse.createResponse("User is created.", null));
     } catch (e: any) {
-      Logger.error(e);
       next(e);
     }
   }
@@ -68,43 +64,41 @@ AuthenticationRoute.post(
 AuthenticationRoute.post(
   "/login",
   async (req: Request, res: Response, next: NextFunction) => {
-    const { username, password } = req.body;
-
-    if (!password) {
-      res
-        .status(400)
-        .send(MyResponse.createResponse(null, "Password is required"));
-      return;
-    }
-    if (!username) {
-      res
-        .status(400)
-        .send(MyResponse.createResponse(null, "Username is required"));
-      return;
-    }
-
     try {
-      const passwordBasedAuth: PasswordBasedAuth = await CheckCredential(
-        username,
-        password
-      );
+      const auth_type = req.headers["auth-type"];
 
-      const { access_token, refresh_token } = await CreateToken(
-        passwordBasedAuth.user_id
-      );
+      if (auth_type == "password") {
+        const { username, password } = req.body;
+        if (!password) {
+          res
+            .status(400)
+            .send(MyResponse.createResponse(null, "Password is required"));
+          return;
+        }
+        if (!username) {
+          res
+            .status(400)
+            .send(MyResponse.createResponse(null, "Username is required"));
+          return;
+        }
 
-      res.setHeader("Set-Cookie", [
-        `refresh_token=${refresh_token}; HttpOnly`,
-        `access_token=${access_token}; HttpOnly`,
-      ]);
+        const tokens = await AuthenticationController.PasswordBasedLogin(
+          username,
+          password
+        );
 
-      res.json({ refresh_token, access_token });
-    } catch (e) {
-      Logger.error(e);
-      if (e instanceof MyError) {
-        res.status(400).send(MyResponse.createResponse(null, e.message));
+        res.setHeader("Set-Cookie", [
+          `refresh_token=${tokens.refresh_token}; Path=/; HttpOnly`,
+          `access_token=${tokens.access_token}; Path=/; HttpOnly`,
+        ]);
+        res.status(200).send(MyResponse.createResponse(tokens));
         return;
       }
+
+      res
+        .status(400)
+        .json(MyResponse.createResponse(null, "Auth type is not supported."));
+    } catch (e) {
       next(e);
     }
   }
@@ -113,21 +107,29 @@ AuthenticationRoute.post(
 AuthenticationRoute.post(
   "/logout",
   async (req: Request, res: Response, next: NextFunction) => {
+    res.clearCookie("refresh_token");
+    res.clearCookie("access_token");
     try {
       const access_token = req.headers.authorization?.split(" ")[1];
       if (!access_token) {
         res
           .status(400)
-          .send(MyResponse.createResponse(null, "Access token is required"));
+          .send(
+            MyResponse.createResponse(
+              null,
+              MyError.createError(
+                MyErrorTypes.ACCESS_TOKEN_NOT_FOUND
+              ).toString()
+            )
+          );
         return;
       }
 
       const payload = jwtDecode(access_token);
       const user_id = payload.user_id;
-      Logout(user_id);
+      await AuthenticationController.Logout(user_id);
       res.sendStatus(200);
     } catch (e) {
-      Logger.error(e);
       next(e);
     }
   }
@@ -141,37 +143,55 @@ AuthenticationRoute.post(
     if (!refresh_token) {
       res
         .status(400)
-        .send(MyResponse.createResponse(null, "refresh_token is required."));
+        .send(
+          MyResponse.createResponse(
+            null,
+            MyError.createError(MyErrorTypes.REFRESH_TOKEN_NOT_FOUND).toString()
+          )
+        );
       return;
     }
-
     try {
-      const access_token = await GetNewAccessToken(refresh_token);
-
-      res.status(200).send(MyResponse.createResponse({ access_token }));
+      const new_access_token =
+        await AuthenticationController.RefreshAccessToken(refresh_token);
+      res
+        .status(200)
+        .send(MyResponse.createResponse({ access_token: new_access_token }));
     } catch (e) {
       if (e instanceof JsonWebTokenError) {
         if (e.message === "jwt malformed") {
-          res
-            .status(400)
-            .send(
-              MyResponse.createResponse(
-                null,
-                "You have to give refresh token as correct format."
-              )
-            );
-
-          next();
+          next(MyError.createError(MyErrorTypes.BAD_JSON));
           return;
         }
+      } else if (e instanceof ForeignKeyConstraintError) {
+        next(MyError.createError(MyErrorTypes.USER_ID_NOT_FOUND));
+        return;
       }
+      next(e);
+    }
+  }
+);
 
-      if (e instanceof MyError) {
-        res.status(400).send(MyResponse.createResponse(null, e.message));
-        next();
+AuthenticationRoute.post(
+  "/checkSession",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const access_token = req.headers["authorization"]?.split(" ")[1];
+
+      if (!access_token) {
+        res.sendStatus(401);
         return;
       }
 
+      const status = await AuthenticationController.CheckIsTokenExistAndValid(
+        access_token
+      );
+      if (status) {
+        res.status(200).json(MyResponse.createResponse({ status: "valid" }));
+      } else {
+        res.status(401).json(MyResponse.createResponse({ status: "invalid" }));
+      }
+    } catch (e) {
       next(e);
     }
   }

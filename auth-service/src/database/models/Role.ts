@@ -38,5 +38,6 @@ Role.init(
     paranoid: false,
     timestamps: false,
     tableName: "RoleTable",
+    schema: "authentication",
   }
 );

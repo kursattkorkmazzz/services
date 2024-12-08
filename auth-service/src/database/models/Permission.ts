@@ -47,5 +47,6 @@ Permission.init(
     paranoid: false,
     timestamps: false,
     tableName: "PermissionTable",
+    schema: "authentication",
   }
 );
