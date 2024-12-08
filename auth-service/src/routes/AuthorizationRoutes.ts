@@ -1,8 +1,6 @@
-import AuthenticationController from "@/controllers/authentication-controller/AuthenticationController";
-import AuthorizationController from "@/controllers/authorization-controller/AuthorizationController";
+import AuthorizationController from "@/controllers/AuthorizationController";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
-import Logger from "@/utils/logger";
 import MyResponse from "@/utils/response/MyResponse";
 import express, { NextFunction, Request, Response } from "express";
 

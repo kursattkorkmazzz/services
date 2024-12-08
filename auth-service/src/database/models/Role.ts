@@ -10,8 +10,8 @@ export default class Role extends Model<
   InferAttributes<Role>,
   InferCreationAttributes<Role>
 > {
-  declare id: string;
-  declare name: string | null;
+  declare id: string | null;
+  declare name: string;
   declare description: string | null;
 }
 
@@ -26,7 +26,8 @@ Role.init(
     },
     name: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: false,
+      unique: true,
     },
     description: {
       type: DataTypes.TEXT,

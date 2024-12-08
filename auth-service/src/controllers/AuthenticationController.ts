@@ -324,4 +324,23 @@ export default class AuthenticationController {
       throw e;
     }
   }
+
+  /**
+   * Extracts the user ID from a given Access token.
+   *
+   * @param token - The JWT token from which to extract the user ID.
+   * @returns A promise that resolves to an object containing the user ID.
+   * @throws Will throw an error if the token cannot be decoded.
+   */
+  public static async GetUserIdFromToken(
+    access_token: string
+  ): Promise<string> {
+    try {
+      const decoded_token = jwtDecode(access_token);
+      const { user_id } = JSON.parse(JSON.stringify(decoded_token));
+      return user_id;
+    } catch (e) {
+      throw e;
+    }
+  }
 }

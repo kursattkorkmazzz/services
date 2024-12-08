@@ -1,14 +1,31 @@
 enum MyErrorTypes {
+  // Default
   UNKNOWN,
+
+  // Authentication Errors
   WRONG_CREDENTIALS = "Username or password is wrong.",
-  USER_ALREADY_EXISTS = "User already exists.",
   ACCESS_TOKEN_NOT_FOUND = "Access token not found.",
   REFRESH_TOKEN_NOT_FOUND = "Refresh token not found.",
+  USER_NOT_LOGGED_IN = "User is not logged in.",
 
-  BAD_JSON = "Bad JSON",
-
+  // User Errors
+  USER_ALREADY_EXISTS = "User already exists.",
   USER_ID_NOT_FOUND = "User id not found.",
+
+  // Permission Errors
   OPERATION_CODE_NOT_FOUND = "Operation code not found.",
+  PERMISSION_DENIED = "Permission denied.",
+
+  // Role Errors
+  ROLE_NAME_REQUIRED = "Role name is required.",
+  ROLEN_NAME_MUST_BE_UNIQE = "Role name must be unique.",
+  ROLE_NOT_FOUND = "Role not found.",
+  // Syntax Errors
+  BAD_JSON = "Bad JSON",
+  UUID_SYNTAX_ERROR = "Invalid id syntax.",
+
+  //General Errors
+  ID_IS_REQUIRED = "Id is required.",
 }
 
 export default MyErrorTypes;

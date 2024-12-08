@@ -1,4 +1,4 @@
-import AuthenticationController from "@/controllers/authentication-controller/AuthenticationController";
+import AuthenticationController from "@/controllers/AuthenticationController";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
 import { jwtDecode } from "@/utils/jwt";

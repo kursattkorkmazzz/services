@@ -8,7 +8,7 @@ import AuthenticationRoute from "./routes/AuthenticationRoutes";
 import AuthorizationRoute from "./routes/AuthorizationRoutes";
 import MyError from "./utils/error/MyError";
 import MyResponse from "./utils/response/MyResponse";
-import MyErrorTypes from "./utils/error/MyErrorTypes";
+import RoleRoute from "./routes/RoleRoute";
 const port: number = process.env.PORT ? parseInt(process.env.PORT) : 3000; // default port to listen
 const app = express();
 
@@ -22,6 +22,7 @@ const app = express();
 
   app.use("/authn", AuthenticationRoute);
   app.use("/authz", AuthorizationRoute);
+  app.use("/role", RoleRoute);
 
   // Default error handler.
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

@@ -1,6 +1,7 @@
 import Permission from "@/database/models/Permission";
 import Role from "@/database/models/Role";
 import User from "@/database/models/User";
+import Logger from "@/utils/logger";
 
 export default class AuthorizationController {
   /**
