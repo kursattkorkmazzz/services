@@ -16,11 +16,4 @@ export default class MyResponse {
     }
     return new MyResponse(data, null);
   }
-
-  public getResponse(): { data?: any | null; error?: string | null } {
-    return {
-      error: this.error || null,
-      data: this.data,
-    };
-  }
 }

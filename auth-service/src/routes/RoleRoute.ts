@@ -1,13 +1,12 @@
-import RoleController from "@/controllers/RoleController";
-import Role from "@/database/models/Role";
+import RoleController from "@/controllers/role-controller/RoleController";
 import authorizationMiddleware from "@/middleware/authorization-middleware";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
-import Logger from "@/utils/logger";
+import MyPagingResponse from "@/utils/response/MyPagingResponse";
 import MyResponse from "@/utils/response/MyResponse";
 import express from "express";
-import { UniqueConstraintError } from "sequelize";
 
+// /role
 const RoleRoute = express.Router();
 
 /**
@@ -17,6 +16,28 @@ const RoleRoute = express.Router();
  * Viewing Specific Role
  * Viewving Roles as List
  */
+
+// Gets list of roles. (Pagination) It must be top most because of conflict with "/:id" route path.
+RoleRoute.get("/roles", async (req, res, next) => {
+  try {
+    const { page, limit } = req.query;
+    const roles = await RoleController.GetRoles(Number(page), Number(limit));
+
+    res.status(200).send(
+      MyPagingResponse.createPagingResponse(
+        {
+          page: Number(page),
+          pageSize: Number(limit),
+          total: roles.totalCount,
+          roles: roles.roleList,
+        },
+        null
+      )
+    );
+  } catch (e) {
+    next(e);
+  }
+});
 
 // Creating New Role
 RoleRoute.post(
@@ -99,20 +120,126 @@ RoleRoute.get(
 );
 
 // Updating Role information such as name and description.
-RoleRoute.patch("/:id", async (req, res, next) => {});
+RoleRoute.patch(
+  "/:id",
+  authorizationMiddleware("role:update"),
+  async (req, res, next) => {
+    try {
+      const id = req.params.id;
+      const { name, description } = req.body;
 
-// Gets list of roles. (Pagination)
-RoleRoute.get("/roles", async (req, resizeBy, next) => {});
+      if (!id) {
+        res
+          .status(400)
+          .send(
+            MyResponse.createResponse(
+              null,
+              MyError.createError(MyErrorTypes.ID_IS_REQUIRED).toString()
+            )
+          );
+        return;
+      }
+
+      const updatedRole = await RoleController.UpdateRole(id, {
+        name,
+        description,
+      });
+
+      res.status(200).send(MyResponse.createResponse(updatedRole.toJSON()));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 
 // Getting all permissions of a role
-RoleRoute.get("/:id/permissions", async (req, res, next) => {});
+RoleRoute.get(
+  "/:id/permissions",
+  authorizationMiddleware("role:read"),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const permissions = await RoleController.GetPermissionsOfRole(id);
+      res.status(200).send(MyResponse.createResponse(permissions));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 
 // Deleting a permission from a role
 RoleRoute.delete(
-  "/:id/permission/:permission_id",
-  async (req, res, next) => {}
+  "/:role_id/permission/:permission_id",
+  authorizationMiddleware("role:update"),
+  async (req, res, next) => {
+    try {
+      const { role_id, permission_id } = req.params;
+
+      if (!role_id) {
+        res
+          .status(400)
+          .send(
+            MyResponse.createResponse(
+              null,
+              MyError.createError(MyErrorTypes.ROLE_ID_REQURIED).toString()
+            )
+          );
+      }
+
+      if (!permission_id) {
+        res
+          .status(400)
+          .send(
+            MyResponse.createResponse(
+              null,
+              MyError.createError(
+                MyErrorTypes.PERMISSION_ID_REQURIED
+              ).toString()
+            )
+          );
+      }
+
+      const status: boolean = await RoleController.DeletePermissionFromRole(
+        role_id,
+        permission_id
+      );
+      if (status) {
+        res.sendStatus(200);
+        return;
+      } else {
+        res.sendStatus(400);
+        return;
+      }
+    } catch (e) {
+      next(e);
+    }
+  }
 );
+
 // Adding a permission to a role
-RoleRoute.post("/:id/permission/:permission_id", async (req, res, next) => {});
+RoleRoute.post(
+  "/:role_id/permission/:permission_id",
+  authorizationMiddleware("role:update"),
+  async (req, res, next) => {
+    try {
+      const { role_id, permission_id } = req.params;
+
+      const result: boolean = await RoleController.AddPermissionToRole(
+        role_id,
+        permission_id
+      );
+
+      if (result) {
+        res.sendStatus(200);
+        return;
+      } else {
+        res.sendStatus(400);
+        return;
+      }
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 
 export default RoleRoute;

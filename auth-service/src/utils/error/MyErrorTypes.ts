@@ -15,11 +15,14 @@ enum MyErrorTypes {
   // Permission Errors
   OPERATION_CODE_NOT_FOUND = "Operation code not found.",
   PERMISSION_DENIED = "Permission denied.",
+  PERMISSION_ID_REQURIED = "Permission id is required.",
+  PERMISSION_NOT_FOUND = "Permission with given id not found.",
 
   // Role Errors
   ROLE_NAME_REQUIRED = "Role name is required.",
-  ROLEN_NAME_MUST_BE_UNIQE = "Role name must be unique.",
+  ROLE_NAME_MUST_BE_UNIQE = "Role name must be unique.",
   ROLE_NOT_FOUND = "Role not found.",
+  ROLE_ID_REQURIED = "Role id is required.",
   // Syntax Errors
   BAD_JSON = "Bad JSON",
   UUID_SYNTAX_ERROR = "Invalid id syntax.",

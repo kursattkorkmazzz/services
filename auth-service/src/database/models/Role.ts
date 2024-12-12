@@ -3,8 +3,10 @@ import {
   Model,
   InferAttributes,
   InferCreationAttributes,
+  BelongsToManyGetAssociationsMixin,
 } from "sequelize";
 import { SEQUELIZE_DATABASE } from "../Database";
+import Permission from "./Permission";
 
 export default class Role extends Model<
   InferAttributes<Role>,
@@ -13,6 +15,8 @@ export default class Role extends Model<
   declare id: string | null;
   declare name: string;
   declare description: string | null;
+
+  declare getPermissions: BelongsToManyGetAssociationsMixin<Permission>;
 }
 
 Role.init(
