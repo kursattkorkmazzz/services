@@ -332,9 +332,7 @@ export default class AuthenticationController {
    * @returns A promise that resolves to an object containing the user ID.
    * @throws Will throw an error if the token cannot be decoded.
    */
-  public static async GetUserIdFromToken(
-    access_token: string
-  ): Promise<string> {
+  public static GetUserIdFromToken(access_token: string): string {
     try {
       const decoded_token = jwtDecode(access_token);
       const { user_id } = JSON.parse(JSON.stringify(decoded_token));

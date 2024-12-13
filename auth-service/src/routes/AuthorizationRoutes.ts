@@ -7,7 +7,7 @@ import express, { NextFunction, Request, Response } from "express";
 const AuthorizationRoute = express.Router();
 
 AuthorizationRoute.post(
-  "/checkPermission",
+  "/check-permission",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { user_id, operation_code } = req.body;

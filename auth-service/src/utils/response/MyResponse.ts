@@ -1,3 +1,8 @@
+export enum MyResponseTypes {
+  SUCCESS = "Success",
+  FAILED = "Failed",
+}
+
 export default class MyResponse {
   private error?: string | null;
   private data?: any | null;

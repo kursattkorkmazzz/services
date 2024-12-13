@@ -7,6 +7,7 @@ import {
   HasOneGetAssociationMixin,
   BelongsToManyGetAssociationsMixin,
   BelongsToManyHasAssociationMixin,
+  HasOneSetAssociationMixin,
 } from "sequelize";
 import { SEQUELIZE_DATABASE } from "../Database";
 import PasswordBasedAuth from "./authentication_types/PasswordBasedAuth";

@@ -3,41 +3,37 @@ import authorizationMiddleware from "@/middleware/authorization-middleware";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
 import MyPagingResponse from "@/utils/response/MyPagingResponse";
-import MyResponse from "@/utils/response/MyResponse";
+import MyResponse, { MyResponseTypes } from "@/utils/response/MyResponse";
 import express from "express";
 
 // /role
 const RoleRoute = express.Router();
 
-/**
- * Creating New Role
- * Deleting Role
- * Updating Role -- Adding/Removing Permissions from role
- * Viewing Specific Role
- * Viewving Roles as List
- */
-
 // Gets list of roles. (Pagination) It must be top most because of conflict with "/:id" route path.
-RoleRoute.get("/roles", async (req, res, next) => {
-  try {
-    const { page, limit } = req.query;
-    const roles = await RoleController.GetRoles(Number(page), Number(limit));
+RoleRoute.get(
+  "/roles",
+  authorizationMiddleware("role:read"),
+  async (req, res, next) => {
+    try {
+      const { page, limit } = req.query;
+      const roles = await RoleController.GetRoles(Number(page), Number(limit));
 
-    res.status(200).send(
-      MyPagingResponse.createPagingResponse(
-        {
-          page: Number(page),
-          pageSize: Number(limit),
-          total: roles.totalCount,
-          roles: roles.roleList,
-        },
-        null
-      )
-    );
-  } catch (e) {
-    next(e);
+      res.status(200).send(
+        MyPagingResponse.createPagingResponse(
+          {
+            page: Number(page),
+            pageSize: Number(limit),
+            total: roles.totalCount,
+            roles: roles.roleList,
+          },
+          null
+        )
+      );
+    } catch (e) {
+      next(e);
+    }
   }
-});
+);
 
 // Creating New Role
 RoleRoute.post(
@@ -204,10 +200,12 @@ RoleRoute.delete(
         permission_id
       );
       if (status) {
-        res.sendStatus(200);
+        res
+          .status(200)
+          .send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
         return;
       } else {
-        res.sendStatus(400);
+        res.status(400).send(MyResponse.createResponse(MyResponseTypes.FAILED));
         return;
       }
     } catch (e) {
@@ -230,10 +228,12 @@ RoleRoute.post(
       );
 
       if (result) {
-        res.sendStatus(200);
+        res
+          .status(200)
+          .send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
         return;
       } else {
-        res.sendStatus(400);
+        res.status(200).send(MyResponse.createResponse(MyResponseTypes.FAILED));
         return;
       }
     } catch (e) {
@@ -242,4 +242,33 @@ RoleRoute.post(
   }
 );
 
+// Add a role to a user
+RoleRoute.post(
+  "/:role_id/user/:user_id",
+  authorizationMiddleware("role:assign"),
+  async (req, res, next) => {
+    try {
+      const { role_id, user_id } = req.params;
+      await RoleController.AddRoleToUser(user_id, role_id);
+      res.status(200).send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+// Delete a role from a user
+RoleRoute.delete(
+  "/:role_id/user/:user_id",
+  authorizationMiddleware("role:assign"),
+  async (req, res, next) => {
+    try {
+      const { role_id, user_id } = req.params;
+      await RoleController.RemoveRoleFromUser(user_id, role_id);
+      res.status(200).send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 export default RoleRoute;

@@ -11,6 +11,10 @@ enum MyErrorTypes {
   // User Errors
   USER_ALREADY_EXISTS = "User already exists.",
   USER_ID_NOT_FOUND = "User id not found.",
+  USER_NOT_FOUND = "User not found.",
+  FIRSTNAME_REQUIRED = "Firstname is required.",
+  LASTNAME_REQUIRED = "Lastname is required.",
+  EMAIL_REQUIRED = "Email is required.",
 
   // Permission Errors
   OPERATION_CODE_NOT_FOUND = "Operation code not found.",
@@ -23,6 +27,7 @@ enum MyErrorTypes {
   ROLE_NAME_MUST_BE_UNIQE = "Role name must be unique.",
   ROLE_NOT_FOUND = "Role not found.",
   ROLE_ID_REQURIED = "Role id is required.",
+
   // Syntax Errors
   BAD_JSON = "Bad JSON",
   UUID_SYNTAX_ERROR = "Invalid id syntax.",

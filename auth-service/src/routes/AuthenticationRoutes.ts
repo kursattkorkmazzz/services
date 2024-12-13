@@ -2,7 +2,6 @@ import AuthenticationController from "@/controllers/AuthenticationController";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
 import { jwtDecode } from "@/utils/jwt";
-import Logger from "@/utils/logger";
 import MyResponse from "@/utils/response/MyResponse";
 import express, { NextFunction, Request, Response } from "express";
 import { JsonWebTokenError } from "jsonwebtoken";
@@ -173,7 +172,7 @@ AuthenticationRoute.post(
 );
 
 AuthenticationRoute.post(
-  "/checkSession",
+  "/check-session",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const access_token = req.headers["authorization"]?.split(" ")[1];

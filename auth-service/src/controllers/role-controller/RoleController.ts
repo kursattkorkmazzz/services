@@ -12,6 +12,9 @@ import {
 import { RoleUpdateOptions } from "./RoleControllerTypes";
 import Permission from "@/database/models/Permission";
 import PermissionRole from "@/database/models/junction_models/PermissionRole";
+import User from "@/database/models/User";
+import UserController from "../user-controller/UserController";
+import UserRole from "@/database/models/junction_models/UserRole";
 
 export default class RoleController {
   /**
@@ -76,9 +79,9 @@ export default class RoleController {
   /**
    * Retrieves a role by its ID.
    *
-   * @param id - The ID of the role to retrieve.
-   * @returns A promise that resolves to the role if found.
-   * @throws {MyError} If the role is not found.
+   * @param {string} role_id - The ID of the role to retrieve.
+   * @returns {Promise<Role>} A promise that resolves to the role object.
+   * @throws {MyError} Throws an error if the role is not found.
    */
   public static async ReadRoleById(id: string): Promise<Role> {
     try {
@@ -223,6 +226,58 @@ export default class RoleController {
       if (e instanceof ForeignKeyConstraintError) {
         throw MyError.createError(MyErrorTypes.PERMISSION_NOT_FOUND);
       }
+      throw e;
+    }
+  }
+
+  /**
+   * Adds a role to a user by their respective IDs.
+   *
+   * @param user_id - The ID of the user to whom the role will be added.
+   * @param role_id - The ID of the role to be added to the user.
+   * @returns A promise that resolves when the role has been successfully added to the user.
+   * @throws Will throw an error if the role or user cannot be found, or if there is an issue creating the user-role association.
+   */
+  public static async AddRoleToUser(
+    user_id: string,
+    role_id: string
+  ): Promise<void> {
+    try {
+      const role = await this.ReadRoleById(role_id);
+      const user = await UserController.GetUserById(user_id);
+
+      await UserRole.create({
+        user_id: user.id,
+        role_id: role.id,
+      });
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  /**
+   * Removes a role from a user.
+   *
+   * @param user_id - The ID of the user from whom the role will be removed.
+   * @param role_id - The ID of the role to be removed from the user.
+   * @returns A promise that resolves when the role has been removed from the user.
+   * @throws Will throw an error if the role or user cannot be found, or if the removal operation fails.
+   */
+  public static async RemoveRoleFromUser(
+    user_id: string,
+    role_id: string
+  ): Promise<void> {
+    try {
+      const role = await this.ReadRoleById(role_id);
+      const user = await UserController.GetUserById(user_id);
+
+      await UserRole.destroy({
+        where: {
+          user_id: user.id,
+          role_id: role.id,
+        },
+      });
+    } catch (e) {
       throw e;
     }
   }
