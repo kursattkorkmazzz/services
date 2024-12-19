@@ -10,8 +10,6 @@ import express from "express";
 
 const UserRoute = express.Router();
 
-// ======================================== ADMIN API ========================================
-
 // Gets profile of list of users.
 UserRoute.get(
   "/users",

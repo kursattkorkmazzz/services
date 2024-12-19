@@ -97,6 +97,5 @@ User.init(
     sequelize: SEQUELIZE_DATABASE,
     paranoid: true,
     tableName: "UserTable",
-    schema: "authentication",
   }
 );

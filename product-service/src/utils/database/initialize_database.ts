@@ -9,6 +9,7 @@ export const InitializeDatabase = async () => {
   } catch (db_error) {
     if (db_error instanceof ConnectionError) {
       Logger.error("Database connection failed.");
+      Logger.error(db_error);
       process.exit(1);
     }
     Logger.error("Database error happened: ", db_error);
