@@ -23,6 +23,5 @@ PermissionRole.init(
     paranoid: false,
     timestamps: false,
     tableName: "PermissionRoleTable",
-    schema: "authentication",
   }
 );

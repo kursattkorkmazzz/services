@@ -18,5 +18,6 @@ export const SEQUELIZE_DATABASE = new Sequelize({
     updatedAt: "updated_at",
     underscored: true,
     charset: "utf8",
+    schema: process.env.DB_SCHEMA,
   },
 });

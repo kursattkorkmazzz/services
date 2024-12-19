@@ -54,6 +54,5 @@ Token.init(
     sequelize: SEQUELIZE_DATABASE,
     paranoid: true,
     tableName: "TokenTable",
-    schema: "authentication",
   }
 );

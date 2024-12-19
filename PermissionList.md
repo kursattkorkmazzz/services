@@ -14,7 +14,7 @@
 | user:read            | Kullanıcının kendi bilgilerini okumasına izin verir.         |
 | user:delete          | Kullanıcının kendi hesabını silmesine izin verir.            |
 | user:update          | Kullanıcının kendi bilgilerini güncellemesine izin verir.    |
-|                      |                                                              |
+| **ITEM PERMISSIONS** | ---                                                          |
 |                      |                                                              |
 
 

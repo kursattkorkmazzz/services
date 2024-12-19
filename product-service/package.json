@@ -1,10 +1,10 @@
 {
   "name": "product-service",
   "version": "1.0.0",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
-    "start": "npx tsx ./src/server.ts",
-    "watch": "npx tsx --watch ./src/server.ts",
+    "start": "npx tsx  --env-file=./.env.dev ./src/server.ts",
+    "watch": "npx tsx --watch --env-file=./.env.dev ./src/server.ts",
     "build": "npx tsx ./build.ts "
   },
   "author": "",
@@ -13,6 +13,7 @@
   "devDependencies": {
     "@types/express": "^5.0.0",
     "esbuild": "^0.24.0",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
   "dependencies": {

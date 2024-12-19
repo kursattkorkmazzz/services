@@ -3,45 +3,52 @@ import {
   Model,
   InferAttributes,
   InferCreationAttributes,
-  BelongsToManyGetAssociationsMixin,
 } from "sequelize";
 import { SEQUELIZE_DATABASE } from "../Database";
-import Permission from "./Permission";
 
-export default class Role extends Model<
-  InferAttributes<Role>,
-  InferCreationAttributes<Role>
+export default class Item extends Model<
+  InferAttributes<Item>,
+  InferCreationAttributes<Item>
 > {
   declare id: string | null;
   declare name: string;
+  declare base_price: number | null;
   declare description: string | null;
-
-  declare getPermissions: BelongsToManyGetAssociationsMixin<Permission>;
+  declare image_urls: string[] | null;
 }
 
-Role.init(
+Item.init(
   {
     id: {
       type: DataTypes.UUID,
-      primaryKey: true,
       unique: true,
       allowNull: false,
+      primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
     name: {
       type: DataTypes.TEXT,
       allowNull: false,
-      unique: true,
+    },
+    base_price: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
     description: {
       type: DataTypes.TEXT,
+      defaultValue: null,
       allowNull: true,
+    },
+    image_urls: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+      allowNull: true,
+      defaultValue: null,
     },
   },
   {
     sequelize: SEQUELIZE_DATABASE,
     paranoid: false,
-    timestamps: false,
-    tableName: "RoleTable",
+    tableName: "ItemTable",
   }
 );
