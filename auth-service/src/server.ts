@@ -9,7 +9,6 @@ import AuthorizationRoute from "./routes/AuthorizationRoutes";
 import MyError from "./utils/error/MyError";
 import MyResponse from "./utils/response/MyResponse";
 import RoleRoute from "./routes/RoleRoute";
-import UserRole from "./database/models/junction_models/UserRole";
 import UserRoute from "./routes/UserRoutes";
 const port: number = process.env.PORT ? parseInt(process.env.PORT) : 3000; // default port to listen
 const app = express();

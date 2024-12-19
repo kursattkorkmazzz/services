@@ -77,6 +77,5 @@ PasswordBasedAuth.init(
   {
     sequelize: SEQUELIZE_DATABASE,
     tableName: "PasswordBasedAuthTable",
-    schema: "authentication",
   }
 );

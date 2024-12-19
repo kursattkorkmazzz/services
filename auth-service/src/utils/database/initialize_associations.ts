@@ -67,6 +67,6 @@ export default async function DefineAssociation() {
 }
 
 async function DatabaseSync() {
-  SEQUELIZE_DATABASE.sync({ alter: true });
+  await SEQUELIZE_DATABASE.sync({ alter: true });
   Logger.info("Database syncronized successfully.");
 }
