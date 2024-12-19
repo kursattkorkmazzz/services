@@ -1,5 +1,6 @@
 import ItemController from "@/controllers/item-controller/ItemController";
 import { ItemUpdateOptions } from "@/controllers/item-controller/ItemControllerTypes";
+import authorizationMiddleware from "@/middleware/authorization-middleware";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
 import MyPagingResponse from "@/utils/response/MyPagingResponse";
 import MyResponse, { MyResponseTypes } from "@/utils/response/MyResponse";
@@ -14,6 +15,7 @@ const ItemRouter = express.Router();
 // Create attribute to item.
 ItemRouter.post(
   "/:id/attribute",
+  authorizationMiddleware("item:create"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name } = req.body;
@@ -37,6 +39,7 @@ ItemRouter.post(
 // Get all attributes of an item
 ItemRouter.get(
   "/:id/attributes",
+  authorizationMiddleware("item:read"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
@@ -55,6 +58,7 @@ ItemRouter.get(
 // Update attribute of an item
 ItemRouter.put(
   "/:id/attribute",
+  authorizationMiddleware("item:update"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { attribute_id, name } = req.body;
@@ -80,6 +84,7 @@ ItemRouter.put(
 // Delete attribute and its all values from item.
 ItemRouter.delete(
   "/:id/attribute",
+  authorizationMiddleware("item:delete"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { attribute_name } = req.body;
@@ -103,6 +108,7 @@ ItemRouter.delete(
 // Add Value to Attribute
 ItemRouter.post(
   "/:id/value",
+  authorizationMiddleware("item:create"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { attribute_id, value, price_effect } = req.body;
@@ -129,6 +135,7 @@ ItemRouter.post(
 // Delete Value from a Attribute of item.
 ItemRouter.delete(
   "/:id/value",
+  authorizationMiddleware("item:delete"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { value_id } = req.body;
@@ -147,6 +154,7 @@ ItemRouter.delete(
 // Update attribute value of attribute of an item.
 ItemRouter.put(
   "/:id/value",
+  authorizationMiddleware("item:update"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { attribute_value_id, value, price_effect } = req.body;
@@ -175,37 +183,42 @@ ItemRouter.put(
 // ********** Item CRUD **********
 
 /// Get all items
-ItemRouter.get("/", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    let { page, limit } = req.query;
+ItemRouter.get(
+  "/",
+  authorizationMiddleware("item:read"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      let { page, limit } = req.query;
 
-    if (!page) {
-      page = String(0);
-    }
-    if (!limit) {
-      limit = String(5);
-    }
-    const roles = await ItemController.GetItems(Number(page), Number(limit));
+      if (!page) {
+        page = String(0);
+      }
+      if (!limit) {
+        limit = String(5);
+      }
+      const roles = await ItemController.GetItems(Number(page), Number(limit));
 
-    res.status(200).send(
-      MyPagingResponse.createPagingResponse(
-        {
-          page: Number(page),
-          pageSize: Number(limit),
-          total: roles.totalCount,
-          items: roles.itemList,
-        },
-        null
-      )
-    );
-  } catch (e) {
-    next(e);
+      res.status(200).send(
+        MyPagingResponse.createPagingResponse(
+          {
+            page: Number(page),
+            pageSize: Number(limit),
+            total: roles.totalCount,
+            items: roles.itemList,
+          },
+          null
+        )
+      );
+    } catch (e) {
+      next(e);
+    }
   }
-});
+);
 
 // Get a single item by ID
 ItemRouter.get(
   "/:id",
+  authorizationMiddleware("item:read"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
@@ -225,7 +238,7 @@ ItemRouter.get(
 // Create a new item
 ItemRouter.post(
   "/",
-  //authorizationMiddleware(""),
+  authorizationMiddleware("item:create"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { name, base_price, description, image_urls } = req.body;
@@ -252,6 +265,7 @@ ItemRouter.post(
 // Update an existing item by ID
 ItemRouter.put(
   "/:id",
+  authorizationMiddleware("item:update"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
@@ -269,6 +283,7 @@ ItemRouter.put(
 // Delete an item by ID
 ItemRouter.delete(
   "/:id",
+  authorizationMiddleware("item:delete"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;

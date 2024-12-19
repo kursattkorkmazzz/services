@@ -10,8 +10,6 @@ import ItemRouter from "./routers/ItemRouter";
 import { BaseError, DatabaseError } from "sequelize";
 import sendError from "./utils/send-error";
 import MyErrorTypes from "./utils/error/MyErrorTypes";
-import AttributeRouter from "./routers/AttributeRouter";
-import AttributeValueRouter from "./routers/AttributeValueRouter";
 
 const port: number = process.env.PORT ? parseInt(process.env.PORT) : 3000; // default port to listen
 const app = express();
@@ -25,9 +23,6 @@ const app = express();
   app.use(express.json());
 
   app.use("/item-service/item", ItemRouter);
-  //app.use("/item-service/attribute", AttributeRouter);
-  //app.use("/item-service/attribute-value", AttributeValueRouter);
-
   // Default error handler.
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (err instanceof MyError) {

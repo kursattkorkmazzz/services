@@ -15,6 +15,14 @@
 | user:delete          | Kullanıcının kendi hesabını silmesine izin verir.            |
 | user:update          | Kullanıcının kendi bilgilerini güncellemesine izin verir.    |
 | **ITEM PERMISSIONS** | ---                                                          |
+| item:read            | Herhangi bir ürün'ü ve özelliklerini görüntüleyebilir.       |
+| item:create          | Yeni bir ürün ve özellikler oluşturabilir.                   |
+| item:update          | Herhangi bir ürünü ve özelliklerini güncelleyebilir.         |
+| item:delete          | Herhangi bir ürünü ve özelliklerini silebilir.               |
+|                      |                                                              |
+|                      |                                                              |
+|                      |                                                              |
+|                      |                                                              |
 |                      |                                                              |
 
 

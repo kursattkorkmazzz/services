@@ -1,3 +1,4 @@
+import AuthenticationController from "@/controllers/AuthenticationController";
 import AuthorizationController from "@/controllers/AuthorizationController";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
@@ -10,7 +11,24 @@ AuthorizationRoute.post(
   "/check-permission",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { user_id, operation_code } = req.body;
+      const access_token = req.headers["authorization"]?.split(" ")[1];
+      if (!access_token) {
+        res
+          .status(401)
+          .json(
+            MyResponse.createResponse(
+              null,
+              MyError.createError(
+                MyErrorTypes.ACCESS_TOKEN_NOT_FOUND
+              ).toString()
+            )
+          );
+        return;
+      }
+
+      const user_id = AuthenticationController.GetUserIdFromToken(access_token);
+
+      const { operation_code } = req.body;
 
       if (!user_id) {
         res
