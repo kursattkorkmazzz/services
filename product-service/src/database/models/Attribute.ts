@@ -5,6 +5,7 @@ import {
   Model,
   HasManyGetAssociationsMixin,
   HasManyCreateAssociationMixin,
+  HasManyRemoveAssociationMixin,
 } from "sequelize";
 import { SEQUELIZE_DATABASE } from "../Database";
 import AttributeValue from "./AttributeValueTable";
@@ -18,6 +19,10 @@ export default class Attribute extends Model<
 
   declare getAttributeValues: HasManyGetAssociationsMixin<AttributeValue>;
   declare createAttributeValue: HasManyCreateAssociationMixin<AttributeValue>;
+  declare removeAttributeValue: HasManyRemoveAssociationMixin<
+    AttributeValue,
+    string
+  >;
 }
 
 Attribute.init(

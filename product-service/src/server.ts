@@ -25,8 +25,8 @@ const app = express();
   app.use(express.json());
 
   app.use("/item-service/item", ItemRouter);
-  app.use("/item-service/attribute", AttributeRouter);
-  app.use("/item-service/attribute-value", AttributeValueRouter);
+  //app.use("/item-service/attribute", AttributeRouter);
+  //app.use("/item-service/attribute-value", AttributeValueRouter);
 
   // Default error handler.
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

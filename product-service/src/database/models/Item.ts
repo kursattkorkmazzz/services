@@ -3,8 +3,13 @@ import {
   Model,
   InferAttributes,
   InferCreationAttributes,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyRemoveAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyCreateAssociationMixin,
 } from "sequelize";
 import { SEQUELIZE_DATABASE } from "../Database";
+import Attribute from "./Attribute";
 
 export default class Item extends Model<
   InferAttributes<Item>,
@@ -15,6 +20,14 @@ export default class Item extends Model<
   declare base_price: number | null;
   declare description: string | null;
   declare image_urls: string[] | null;
+
+  declare addAttribute: BelongsToManyAddAssociationMixin<Attribute, string>;
+  declare removeAttribute: BelongsToManyRemoveAssociationMixin<
+    Attribute,
+    string
+  >;
+  declare getAttributes: BelongsToManyGetAssociationsMixin<Attribute>;
+  declare createAttribute: BelongsToManyCreateAssociationMixin<Attribute>;
 }
 
 Item.init(

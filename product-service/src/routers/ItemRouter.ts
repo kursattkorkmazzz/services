@@ -7,6 +7,173 @@ import sendError from "@/utils/send-error";
 import express, { NextFunction, Request, Response } from "express";
 const ItemRouter = express.Router();
 
+// /item-service/item/
+
+// ************ Item Attribute and Value CRUD ************
+
+// Create attribute to item.
+ItemRouter.post(
+  "/:id/attribute",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { name } = req.body;
+      const item_id = req.params.id;
+      if (!item_id) {
+        sendError(MyErrorTypes.ID_IS_REQUIRED, res, 400);
+        return;
+      }
+      if (!name) {
+        sendError(MyErrorTypes.NAME_IS_REQUIRED, res, 400);
+        return;
+      }
+      await ItemController.AddAttributeToItem(item_id, { name });
+      res.status(200).send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+// Get all attributes of an item
+ItemRouter.get(
+  "/:id/attributes",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        sendError(MyErrorTypes.ID_IS_REQUIRED, res, 400);
+        return;
+      }
+      const attributes = await ItemController.GetAttributesOfItemById(id);
+      res.status(200).send(MyResponse.createResponse(attributes));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+// Update attribute of an item
+ItemRouter.put(
+  "/:id/attribute",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { attribute_id, name } = req.body;
+
+      if (!attribute_id) {
+        sendError(MyErrorTypes.ID_IS_REQUIRED, res, 400);
+        return;
+      }
+
+      const updatedAttribute = await ItemController.UpdateAttributeOfItem(
+        attribute_id,
+        { name }
+      );
+      res
+        .status(200)
+        .send(MyResponse.createResponse(updatedAttribute.toJSON()));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+// Delete attribute and its all values from item.
+ItemRouter.delete(
+  "/:id/attribute",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { attribute_name } = req.body;
+      const item_id = req.params.id;
+      if (!item_id) {
+        sendError(MyErrorTypes.ID_IS_REQUIRED, res, 400);
+        return;
+      }
+
+      if (!attribute_name) {
+        sendError(MyErrorTypes.NAME_IS_REQUIRED, res, 400);
+        return;
+      }
+      await ItemController.RemoveAttributeFromItem(item_id, attribute_name);
+      res.status(200).send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+// Add Value to Attribute
+ItemRouter.post(
+  "/:id/value",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { attribute_id, value, price_effect } = req.body;
+      if (!attribute_id) {
+        sendError(MyErrorTypes.ID_IS_REQUIRED, res, 400);
+        return;
+      }
+      if (!value) {
+        sendError(MyErrorTypes.ATTRIBUTE_VALUE_NOT_FOUND, res, 400);
+        return;
+      }
+      await ItemController.AddValueToAttribute({
+        attribute_id: attribute_id,
+        value: value,
+        priceEffect: price_effect,
+      });
+      res.status(200).send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+// Delete Value from a Attribute of item.
+ItemRouter.delete(
+  "/:id/value",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { value_id } = req.body;
+
+      if (!value_id) {
+        sendError(MyErrorTypes.ID_IS_REQUIRED, res, 400);
+        return;
+      }
+
+      await ItemController.DeleteAttributeValue(value_id);
+    } catch (e) {
+      throw e;
+    }
+  }
+);
+// Update attribute value of attribute of an item.
+ItemRouter.put(
+  "/:id/value",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { attribute_value_id, value, price_effect } = req.body;
+      if (!attribute_value_id) {
+        sendError(MyErrorTypes.ID_IS_REQUIRED, res, 400);
+        return;
+      }
+
+      const updatedAttributeValue = await ItemController.UpdateAttributeValue(
+        attribute_value_id,
+        {
+          priceEffect: price_effect,
+          value: value,
+        }
+      );
+
+      res
+        .status(200)
+        .send(MyResponse.createResponse(updatedAttributeValue.toJSON()));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+// ********** Item CRUD **********
+
 /// Get all items
 ItemRouter.get("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -113,4 +280,5 @@ ItemRouter.delete(
   }
 );
 
+// Remove attribute from item.
 export default ItemRouter;

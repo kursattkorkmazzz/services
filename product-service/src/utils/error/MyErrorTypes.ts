@@ -9,7 +9,7 @@ enum MyErrorTypes {
 
   // Item
   ITEM_NOT_FOUND = "The item is not found.",
-
+  ITEM_HAS_SAME_ATTRIBUTE = "The item already has the attribute with given name.",
   // Attribute
   ATTRIBUTE_NOT_FOUND = "The attribute is not found.",
 

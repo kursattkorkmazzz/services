@@ -1,6 +1,8 @@
 import { SEQUELIZE_DATABASE } from "@/database/Database";
 import Attribute from "@/database/models/Attribute";
 import AttributeValue from "@/database/models/AttributeValueTable";
+import Item from "@/database/models/Item";
+import ItemAttribute from "@/database/models/ItemAttribute";
 import Logger from "@/utils/logger";
 
 export default async function DefineAssociation() {
@@ -14,6 +16,18 @@ export default async function DefineAssociation() {
     AttributeValue.belongsTo(Attribute, {
       foreignKey: "attribute_id",
       onDelete: "CASCADE",
+    });
+
+    // Association between Item and Attribute
+    Item.belongsToMany(Attribute, {
+      through: ItemAttribute,
+      foreignKey: "item_id",
+      timestamps: false,
+    });
+    Attribute.belongsToMany(Item, {
+      through: ItemAttribute,
+      foreignKey: "attribute_id",
+      timestamps: false,
     });
 
     await DatabaseSync();
