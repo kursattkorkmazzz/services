@@ -2,6 +2,7 @@ import AuthenticationController from "@/controllers/AuthenticationController";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
 import { jwtDecode } from "@/utils/jwt";
+import Logger from "@/utils/logger";
 import MyResponse from "@/utils/response/MyResponse";
 import express, { NextFunction, Request, Response } from "express";
 import { JsonWebTokenError } from "jsonwebtoken";
@@ -68,6 +69,7 @@ AuthenticationRoute.post(
 
       if (auth_type == "password") {
         const { username, password } = req.body;
+
         if (!password) {
           res
             .status(400)

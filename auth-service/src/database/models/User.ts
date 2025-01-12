@@ -29,9 +29,12 @@ export default class User extends Model<
   declare is_system_user: boolean | null;
   declare created_at: Date | null;
   declare updated_at: Date | null;
-  declare deleted_at: Date | null;
 
   declare getPasswordBasedAuth: HasOneGetAssociationMixin<PasswordBasedAuth>;
+  declare setPasswordBasedAuth: HasOneSetAssociationMixin<
+    PasswordBasedAuth,
+    string
+  >;
   declare getToken: HasOneGetAssociationMixin<Token>;
   declare getRoles: BelongsToManyGetAssociationsMixin<Role>;
   declare hasRole: BelongsToManyHasAssociationMixin<Role, string>;
@@ -65,13 +68,13 @@ User.init(
       },
     },
     birth_date: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: true,
       defaultValue: null,
     },
     gender: {
       type: DataTypes.ENUM("male", "female", "unknown"),
-      allowNull: false,
+      allowNull: true,
       defaultValue: "unknown",
     },
     photo_url: {
@@ -91,11 +94,10 @@ User.init(
     },
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE,
-    deleted_at: DataTypes.DATE,
   },
   {
     sequelize: SEQUELIZE_DATABASE,
-    paranoid: true,
+    paranoid: false,
     tableName: "UserTable",
   }
 );

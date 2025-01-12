@@ -1,12 +1,15 @@
 import AuthenticationController from "@/controllers/AuthenticationController";
 import AuthorizationController from "@/controllers/AuthorizationController";
 import UserController from "@/controllers/user-controller/UserController";
+import { UserCreateOptions } from "@/controllers/user-controller/UserControllerTypes";
 import authorizationMiddleware from "@/middleware/authorization-middleware";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
+import Logger from "@/utils/logger";
 import MyPagingResponse from "@/utils/response/MyPagingResponse";
 import MyResponse, { MyResponseTypes } from "@/utils/response/MyResponse";
 import express from "express";
+import { ValidationError } from "sequelize";
 
 const UserRoute = express.Router();
 
@@ -17,15 +20,15 @@ UserRoute.get(
   async (req, res, next) => {
     try {
       const { page, limit } = req.query;
-      const roles = await UserController.GetUsers(Number(page), Number(limit));
+      const users = await UserController.GetUsers(Number(page), Number(limit));
 
       res.status(200).send(
         MyPagingResponse.createPagingResponse(
           {
             page: Number(page),
             pageSize: Number(limit),
-            total: roles.totalCount,
-            roles: roles.userList,
+            total: users.totalCount,
+            users: users.userList,
           },
           null
         )
@@ -53,12 +56,12 @@ UserRoute.get(
 
 // Deleting **any** user by id
 UserRoute.delete(
-  "/:ids",
+  "/:id",
   authorizationMiddleware("user:delete-any"),
   async (req, res, next) => {
     try {
-      const ids = req.params.ids.split(",");
-      if (!ids) {
+      const id = req.params.id;
+      if (!id) {
         res
           .status(400)
           .send(
@@ -70,7 +73,7 @@ UserRoute.delete(
         return;
       }
 
-      await UserController.DeleteUsersByIds(ids);
+      await UserController.DeleteUsersById(id);
       res.status(200).send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
     } catch (e) {
       next(e);
@@ -117,7 +120,7 @@ UserRoute.patch(
 );
 
 // Setting PasswordBaseAuth for User
-UserRoute.post(
+UserRoute.patch(
   "/:user_id/password-based-auth",
   authorizationMiddleware("user:update-any"),
   async (req, res, next) => {
@@ -135,7 +138,7 @@ UserRoute.post(
           );
         return;
       }
-      await UserController.SetPasswordBaseAuth(user_id, password);
+      await UserController.SetPasswordBaseAuth(user_id, { username, password });
       res.status(200).send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
     } catch (e) {
       next(e);
@@ -149,8 +152,39 @@ UserRoute.post(
   authorizationMiddleware("user:create"),
   async (req, res, next) => {
     try {
-      const { firstname, lastname, email, birth_date, gender, photo_url } =
-        req.body;
+      const {
+        firstname,
+        lastname,
+        email,
+        birth_date,
+        gender,
+        photo_url,
+        username,
+        password,
+      }: UserCreateOptions = req.body;
+
+      if (!username) {
+        res
+          .status(400)
+          .send(
+            MyResponse.createResponse(
+              null,
+              MyError.createError(MyErrorTypes.USERNAME_REQUIRED).toString()
+            )
+          );
+        return;
+      }
+      if (!password) {
+        res
+          .status(400)
+          .send(
+            MyResponse.createResponse(
+              null,
+              MyError.createError(MyErrorTypes.PASSWORD_REQUIRED).toString()
+            )
+          );
+        return;
+      }
 
       if (!firstname) {
         res
@@ -195,10 +229,36 @@ UserRoute.post(
         birth_date,
         gender,
         photo_url,
+        username,
+        password,
       });
 
       res.status(200).send(MyResponse.createResponse(newUser.toJSON()));
     } catch (e) {
+      if (e instanceof ValidationError) {
+        if (e.errors[0].message === "Validation len on username failed") {
+          res
+            .status(400)
+            .send(
+              MyResponse.createResponse(null, MyErrorTypes.USERNAME_LENGTH)
+            );
+          return;
+        } else if (
+          e.errors[0].message === "Validation isAlphanumeric on username failed"
+        ) {
+          res
+            .status(400)
+            .send(
+              MyResponse.createResponse(
+                null,
+                MyErrorTypes.USERNAME_ALPHANUMERIC
+              )
+            );
+          return;
+        }
+        Logger.error(e.errors[0].message);
+        Logger.error(e);
+      }
       next(e);
     }
   }
@@ -230,7 +290,7 @@ UserRoute.delete(
     try {
       const access_token = req.headers.authorization!.split(" ")[1];
       const user_id = AuthenticationController.GetUserIdFromToken(access_token);
-      await UserController.DeleteUsersByIds([user_id]);
+      await UserController.DeleteUsersById(user_id);
       res.status(200).send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
     } catch (e) {
       next(e);

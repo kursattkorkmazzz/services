@@ -15,6 +15,10 @@ enum MyErrorTypes {
   FIRSTNAME_REQUIRED = "Firstname is required.",
   LASTNAME_REQUIRED = "Lastname is required.",
   EMAIL_REQUIRED = "Email is required.",
+  USERNAME_REQUIRED = "Username is required.",
+  PASSWORD_REQUIRED = "Password is required.",
+  USERNAME_LENGTH = "Username must be between 5 and 20 characters.",
+  USERNAME_ALPHANUMERIC = "Username can be just alpanumeric.",
 
   // Permission Errors
   OPERATION_CODE_NOT_FOUND = "Operation code not found.",
@@ -27,6 +31,7 @@ enum MyErrorTypes {
   ROLE_NAME_MUST_BE_UNIQE = "Role name must be unique.",
   ROLE_NOT_FOUND = "Role not found.",
   ROLE_ID_REQURIED = "Role id is required.",
+  ROLE_DELETE_RESTRICTION = "This role cannot be delete. It is restricted.",
 
   // Syntax Errors
   BAD_JSON = "Bad JSON",

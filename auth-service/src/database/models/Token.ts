@@ -18,7 +18,6 @@ export default class Token extends Model<
   declare expires_at: Date;
   declare created_at: CreationOptional<Date>;
   declare updated_at: CreationOptional<Date>;
-  declare deleted_at: CreationOptional<Date>;
 }
 
 Token.init(
@@ -48,11 +47,10 @@ Token.init(
     },
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE,
-    deleted_at: DataTypes.DATE,
   },
   {
     sequelize: SEQUELIZE_DATABASE,
-    paranoid: true,
+    paranoid: false,
     tableName: "TokenTable",
   }
 );
