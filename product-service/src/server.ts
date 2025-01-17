@@ -6,10 +6,10 @@ import DefineAssociation from "./utils/database/initialize_associations";
 import { InitializeDatabase } from "./utils/database/initialize_database";
 import MyError from "./utils/error/MyError";
 import MyResponse from "./utils/response/MyResponse";
-import ItemRouter from "./routers/ItemRouter";
 import { BaseError, DatabaseError } from "sequelize";
 import sendError from "./utils/send-error";
 import MyErrorTypes from "./utils/error/MyErrorTypes";
+import ProductRouter from "./routers/product-route/ProductRouter";
 
 const port: number = process.env.PORT ? parseInt(process.env.PORT) : 3000; // default port to listen
 const app = express();
@@ -22,7 +22,8 @@ const app = express();
 
   app.use(express.json());
 
-  app.use("/item-service/item", ItemRouter);
+  app.use("/product-service/product", ProductRouter);
+
   // Default error handler.
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (err instanceof MyError) {

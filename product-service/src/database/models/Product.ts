@@ -4,33 +4,26 @@ import {
   InferAttributes,
   InferCreationAttributes,
   BelongsToManyAddAssociationMixin,
-  BelongsToManyRemoveAssociationMixin,
   BelongsToManyGetAssociationsMixin,
-  BelongsToManyCreateAssociationMixin,
+  CreationOptional,
 } from "sequelize";
 import { SEQUELIZE_DATABASE } from "../Database";
-import Attribute from "./Attribute";
+import Category from "./Category";
 
-export default class Item extends Model<
-  InferAttributes<Item>,
-  InferCreationAttributes<Item>
+export default class Product extends Model<
+  InferAttributes<Product>,
+  InferCreationAttributes<Product>
 > {
-  declare id: string | null;
+  declare id: CreationOptional<string>;
   declare name: string;
-  declare base_price: number | null;
+  declare base_price: number;
   declare description: string | null;
   declare image_urls: string[] | null;
-
-  declare addAttribute: BelongsToManyAddAssociationMixin<Attribute, string>;
-  declare removeAttribute: BelongsToManyRemoveAssociationMixin<
-    Attribute,
-    string
-  >;
-  declare getAttributes: BelongsToManyGetAssociationsMixin<Attribute>;
-  declare createAttribute: BelongsToManyCreateAssociationMixin<Attribute>;
+  declare addCategory: BelongsToManyAddAssociationMixin<Category, string>;
+  declare getCategories: BelongsToManyGetAssociationsMixin<Category>;
 }
 
-Item.init(
+Product.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -62,6 +55,6 @@ Item.init(
   {
     sequelize: SEQUELIZE_DATABASE,
     paranoid: false,
-    tableName: "ItemTable",
+    tableName: "ProductTable",
   }
 );

@@ -1,33 +1,24 @@
 import { SEQUELIZE_DATABASE } from "@/database/Database";
-import Attribute from "@/database/models/Attribute";
-import AttributeValue from "@/database/models/AttributeValueTable";
-import Item from "@/database/models/Item";
-import ItemAttribute from "@/database/models/ItemAttribute";
+import ProductCategory from "@/database/junctions/ProductCategory";
+import Category from "@/database/models/Category";
+import Product from "@/database/models/Product";
+
 import Logger from "@/utils/logger";
 
 export default async function DefineAssociation() {
   try {
     // Create Association
 
-    // Association between Attribute and AttributeValue
-    Attribute.hasMany(AttributeValue, {
-      foreignKey: "attribute_id",
+    // Product and Category Association
+    Product.belongsToMany(Category, {
+      through: ProductCategory,
+      foreignKey: "product_id",
+      as: "categories",
     });
-    AttributeValue.belongsTo(Attribute, {
-      foreignKey: "attribute_id",
-      onDelete: "CASCADE",
-    });
-
-    // Association between Item and Attribute
-    Item.belongsToMany(Attribute, {
-      through: ItemAttribute,
-      foreignKey: "item_id",
-      timestamps: false,
-    });
-    Attribute.belongsToMany(Item, {
-      through: ItemAttribute,
-      foreignKey: "attribute_id",
-      timestamps: false,
+    Category.belongsToMany(Product, {
+      through: ProductCategory,
+      foreignKey: "category_id",
+      as: "products",
     });
 
     await DatabaseSync();

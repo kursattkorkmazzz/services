@@ -6,7 +6,7 @@ import esbuild from "esbuild";
     entryPoints: ["./src/**/*.ts"],
     outdir: "./dist",
     allowOverwrite: true,
-    packages: "external",
+    //packages: "external",
     target: "node20",
     bundle: true,
   });
