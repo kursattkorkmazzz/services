@@ -1,22 +1,24 @@
 import Role from "@/database/models/Role";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
-import Logger from "@/utils/logger";
 import {
   DatabaseError,
   ForeignKeyConstraintError,
-  InferAttributes,
-  InstanceUpdateOptions,
   UniqueConstraintError,
 } from "sequelize";
 import { RoleUpdateOptions } from "./RoleControllerTypes";
 import Permission from "@/database/models/Permission";
 import PermissionRole from "@/database/models/junction_models/PermissionRole";
-import User from "@/database/models/User";
 import UserController from "../user-controller/UserController";
 import UserRole from "@/database/models/junction_models/UserRole";
+import Logger from "@/utils/logger";
 
 export default class RoleController {
+  private static staticRoleIdList: string[] = [
+    "a3cf85b7-4995-43fc-9790-58c032b27ab6",
+    "b3cf85b7-4995-43fc-9790-58c032b27ab6",
+  ];
+
   /**
    * Creates a new role with the given name and optional description.
    *
@@ -61,6 +63,29 @@ export default class RoleController {
     try {
       await Promise.all(
         ids.map(async (id) => {
+          if (this.staticRoleIdList.includes(id)) {
+            throw MyError.createError(MyErrorTypes.ROLE_DELETE_RESTRICTION);
+          }
+
+          const userBelongToThisRole = await UserRole.findAll({
+            where: {
+              role_id: id,
+            },
+          });
+          if (userBelongToThisRole.length > 0) {
+            await Promise.all(
+              userBelongToThisRole.map(async (user: UserRole) => {
+                await UserRole.create({
+                  user_id: user.user_id,
+                  role_id: this.staticRoleIdList[1],
+                });
+              })
+            ).catch((e) => {
+              Logger.error(e);
+              return;
+            });
+          }
+
           await Role.destroy({
             where: {
               id: ids,
@@ -115,6 +140,10 @@ export default class RoleController {
       if (!role) {
         throw MyError.createError(MyErrorTypes.ROLE_NOT_FOUND);
       }
+      // Check if the role name is in the restricted list.
+      if (this.staticRoleIdList.includes(role.id!)) {
+        throw MyError.createError(MyErrorTypes.ROLE_DELETE_RESTRICTION);
+      }
 
       await role.update({
         name: newData.name,
@@ -140,14 +169,15 @@ export default class RoleController {
     limit?: number
   ): Promise<{ roleList: Role[]; totalCount: number }> {
     try {
-      let offset = undefined;
+      const Paginagiton: any = {};
+
       if (limit && page) {
-        offset = (page - 1) * limit;
+        Paginagiton["offset"] = (page - 1) * limit;
+        Paginagiton["limit"] = limit;
       }
 
       const roles = await Role.findAll({
-        offset,
-        limit: limit,
+        ...Paginagiton,
       });
 
       const totalRoleCount = await Role.count();
@@ -191,6 +221,10 @@ export default class RoleController {
     permission_id: string
   ): Promise<boolean> {
     try {
+      // Check if the role name is in the restricted list.
+      if (this.staticRoleIdList.includes(role_id)) {
+        throw MyError.createError(MyErrorTypes.ROLE_DELETE_RESTRICTION);
+      }
       const deletedPermissionCount: number = await PermissionRole.destroy({
         where: {
           role_id: role_id,
@@ -217,6 +251,10 @@ export default class RoleController {
     permission_id: string
   ): Promise<boolean> {
     try {
+      // Check if the role name is in the restricted list.
+      if (this.staticRoleIdList.includes(role_id)) {
+        throw MyError.createError(MyErrorTypes.ROLE_DELETE_RESTRICTION);
+      }
       const result: PermissionRole = await PermissionRole.create({
         role_id,
         permission_id,
@@ -243,6 +281,13 @@ export default class RoleController {
     role_id: string
   ): Promise<void> {
     try {
+      if (
+        UserController.staticUserIdList.includes(user_id) &&
+        this.staticRoleIdList.includes(role_id)
+      ) {
+        throw MyError.createError(MyErrorTypes.ROLE_OF_ADMIN_NOT_CHANGEABLE);
+      }
+
       const role = await this.ReadRoleById(role_id);
       const user = await UserController.GetUserById(user_id);
 
@@ -267,6 +312,12 @@ export default class RoleController {
     user_id: string,
     role_id: string
   ): Promise<void> {
+    if (
+      UserController.staticUserIdList.includes(user_id) &&
+      this.staticRoleIdList.includes(role_id)
+    ) {
+      throw MyError.createError(MyErrorTypes.ROLE_OF_ADMIN_NOT_CHANGEABLE);
+    }
     try {
       const role = await this.ReadRoleById(role_id);
       const user = await UserController.GetUserById(user_id);
@@ -277,6 +328,33 @@ export default class RoleController {
           role_id: role.id,
         },
       });
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  public static async GetAllPermissions(
+    page?: number,
+    limit?: number
+  ): Promise<{ permissionsList: Permission[]; totalCount: number }> {
+    try {
+      const Paginagiton: any = {};
+
+      if (limit && page) {
+        Paginagiton["offset"] = (page - 1) * limit;
+        Paginagiton["limit"] = limit;
+      }
+
+      const permissions = await Permission.findAll({
+        ...Paginagiton,
+      });
+
+      const totalPermissionCount = await Permission.count();
+
+      return {
+        permissionsList: permissions,
+        totalCount: totalPermissionCount,
+      };
     } catch (e) {
       throw e;
     }

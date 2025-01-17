@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
+import cors from "cors";
 import { Server } from "http";
 import gracefulShutdown from "./utils/gracefull-shutdown";
 import Logger from "./utils/logger";
@@ -20,6 +21,12 @@ const app = express();
   await DefineAssociation();
 
   app.use(express.json());
+
+  app.use(
+    cors({
+      origin: "*",
+    })
+  );
 
   app.use("/authn", AuthenticationRoute);
   app.use("/authz", AuthorizationRoute);

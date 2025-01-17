@@ -13,7 +13,8 @@ type UserDefaultAttributes =
 export type UserCreateOptions = Pick<
   InferAttributes<User>,
   UserDefaultAttributes
->;
+> &
+  Pick<InferAttributes<PasswordBasedAuth>, "username" | "password">;
 
 export type UserUpdateOptions = Partial<
   Pick<InferAttributes<User>, UserDefaultAttributes>

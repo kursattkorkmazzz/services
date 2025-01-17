@@ -59,10 +59,11 @@ export default async function DefineAssociation() {
     });
 
     await DatabaseSync();
-  } catch (e) {
+  } catch (e: any) {
     Logger.warn(
       "Error happened while model associationing and database synchronizing."
     );
+    Logger.error(e.message);
   }
 }
 
