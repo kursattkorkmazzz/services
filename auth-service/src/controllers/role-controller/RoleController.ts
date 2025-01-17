@@ -11,6 +11,7 @@ import Permission from "@/database/models/Permission";
 import PermissionRole from "@/database/models/junction_models/PermissionRole";
 import UserController from "../user-controller/UserController";
 import UserRole from "@/database/models/junction_models/UserRole";
+import Logger from "@/utils/logger";
 
 export default class RoleController {
   private static staticRoleIdList: string[] = [
@@ -64,6 +65,25 @@ export default class RoleController {
         ids.map(async (id) => {
           if (this.staticRoleIdList.includes(id)) {
             throw MyError.createError(MyErrorTypes.ROLE_DELETE_RESTRICTION);
+          }
+
+          const userBelongToThisRole = await UserRole.findAll({
+            where: {
+              role_id: id,
+            },
+          });
+          if (userBelongToThisRole.length > 0) {
+            await Promise.all(
+              userBelongToThisRole.map(async (user: UserRole) => {
+                await UserRole.create({
+                  user_id: user.user_id,
+                  role_id: this.staticRoleIdList[1],
+                });
+              })
+            ).catch((e) => {
+              Logger.error(e);
+              return;
+            });
           }
 
           await Role.destroy({
@@ -261,6 +281,13 @@ export default class RoleController {
     role_id: string
   ): Promise<void> {
     try {
+      if (
+        UserController.staticUserIdList.includes(user_id) &&
+        this.staticRoleIdList.includes(role_id)
+      ) {
+        throw MyError.createError(MyErrorTypes.ROLE_OF_ADMIN_NOT_CHANGEABLE);
+      }
+
       const role = await this.ReadRoleById(role_id);
       const user = await UserController.GetUserById(user_id);
 
@@ -285,6 +312,12 @@ export default class RoleController {
     user_id: string,
     role_id: string
   ): Promise<void> {
+    if (
+      UserController.staticUserIdList.includes(user_id) &&
+      this.staticRoleIdList.includes(role_id)
+    ) {
+      throw MyError.createError(MyErrorTypes.ROLE_OF_ADMIN_NOT_CHANGEABLE);
+    }
     try {
       const role = await this.ReadRoleById(role_id);
       const user = await UserController.GetUserById(user_id);
@@ -317,7 +350,7 @@ export default class RoleController {
       });
 
       const totalPermissionCount = await Permission.count();
-      
+
       return {
         permissionsList: permissions,
         totalCount: totalPermissionCount,

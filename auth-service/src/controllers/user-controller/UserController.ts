@@ -1,7 +1,7 @@
 import User from "@/database/models/User";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
-import { InferAttributes, Sequelize, Transaction } from "sequelize";
+import { ValidationError } from "sequelize";
 import {
   UserCreateOptions,
   UserPasswordUpdateOptions,
@@ -10,9 +10,13 @@ import {
 import Role from "@/database/models/Role";
 import PasswordBasedAuth from "@/database/models/authentication_types/PasswordBasedAuth";
 import { SEQUELIZE_DATABASE } from "@/database/Database";
-import Logger from "@/utils/logger";
+import RoleController from "../role-controller/RoleController";
 
 export default class UserController {
+  public static staticUserIdList: string[] = [
+    "cd0acd8e-228a-4a43-938f-858980eba621", // Yönetici
+  ];
+
   /**
    * Retrieves a user by their unique identifier.
    *
@@ -51,7 +55,7 @@ export default class UserController {
         },
         { transaction: t }
       );
-      const passwordBasedAuth = await PasswordBasedAuth.create(
+      await PasswordBasedAuth.create(
         {
           username,
           password,
@@ -59,10 +63,25 @@ export default class UserController {
         },
         { transaction: t }
       );
-      t.commit();
+
+      await t.commit();
+      await RoleController.AddRoleToUser(
+        user.id,
+        "b3cf85b7-4995-43fc-9790-58c032b27ab6"
+      );
       return user;
     } catch (e) {
-      t.rollback();
+      await t.rollback();
+      if (e instanceof ValidationError) {
+        if (e.errors[0].type == "unique violation") {
+          switch (e.errors[0].path) {
+            case "username":
+              throw MyError.createError(MyErrorTypes.USERNAME_ALREADY_EXIST);
+            case "email":
+              throw MyError.createError(MyErrorTypes.EMAIL_ALREADY_EXIST);
+          }
+        }
+      }
       throw e;
     }
   }
@@ -75,6 +94,9 @@ export default class UserController {
    * @throws Will throw an error if the deletion process fails.
    */
   public static async DeleteUsersById(id: string): Promise<void> {
+    if (this.staticUserIdList.includes(id)) {
+      throw MyError.createError(MyErrorTypes.CANNOT_DELETE_ADMIN_USER);
+    }
     const t = await SEQUELIZE_DATABASE.transaction();
     try {
       await PasswordBasedAuth.destroy({

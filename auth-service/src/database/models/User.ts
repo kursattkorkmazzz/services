@@ -75,7 +75,7 @@ User.init(
     gender: {
       type: DataTypes.ENUM("male", "female", "unknown"),
       allowNull: true,
-      defaultValue: "unknown",
+      defaultValue: null,
     },
     photo_url: {
       type: DataTypes.STRING,

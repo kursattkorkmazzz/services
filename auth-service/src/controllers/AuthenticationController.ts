@@ -43,6 +43,10 @@ export default class AuthenticationController {
         passwordBasedAuth.user_id
       );
 
+      await passwordBasedAuth.update({
+        last_login: new Date(Date.now()),
+      });
+
       return {
         access_token,
         refresh_token,

@@ -15,10 +15,13 @@ enum MyErrorTypes {
   FIRSTNAME_REQUIRED = "Firstname is required.",
   LASTNAME_REQUIRED = "Lastname is required.",
   EMAIL_REQUIRED = "Email is required.",
+  EMAIL_ALREADY_EXIST = "Email already exist.",
   USERNAME_REQUIRED = "Username is required.",
   PASSWORD_REQUIRED = "Password is required.",
   USERNAME_LENGTH = "Username must be between 5 and 20 characters.",
   USERNAME_ALPHANUMERIC = "Username can be just alpanumeric.",
+  USERNAME_ALREADY_EXIST = "Username already exist.",
+  CANNOT_DELETE_ADMIN_USER = "Admin user cannot be deletable.",
 
   // Permission Errors
   OPERATION_CODE_NOT_FOUND = "Operation code not found.",
@@ -32,6 +35,7 @@ enum MyErrorTypes {
   ROLE_NOT_FOUND = "Role not found.",
   ROLE_ID_REQURIED = "Role id is required.",
   ROLE_DELETE_RESTRICTION = "This role cannot be delete. It is restricted.",
+  ROLE_OF_ADMIN_NOT_CHANGEABLE = "Role of admin user cannot be changed.",
 
   // Syntax Errors
   BAD_JSON = "Bad JSON",

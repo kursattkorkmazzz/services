@@ -185,7 +185,6 @@ UserRoute.post(
           );
         return;
       }
-
       if (!firstname) {
         res
           .status(400)
@@ -197,7 +196,6 @@ UserRoute.post(
           );
         return;
       }
-
       if (!lastname) {
         res
           .status(400)
@@ -209,7 +207,6 @@ UserRoute.post(
           );
         return;
       }
-
       if (!email) {
         res
           .status(400)
@@ -235,30 +232,6 @@ UserRoute.post(
 
       res.status(200).send(MyResponse.createResponse(newUser.toJSON()));
     } catch (e) {
-      if (e instanceof ValidationError) {
-        if (e.errors[0].message === "Validation len on username failed") {
-          res
-            .status(400)
-            .send(
-              MyResponse.createResponse(null, MyErrorTypes.USERNAME_LENGTH)
-            );
-          return;
-        } else if (
-          e.errors[0].message === "Validation isAlphanumeric on username failed"
-        ) {
-          res
-            .status(400)
-            .send(
-              MyResponse.createResponse(
-                null,
-                MyErrorTypes.USERNAME_ALPHANUMERIC
-              )
-            );
-          return;
-        }
-        Logger.error(e.errors[0].message);
-        Logger.error(e);
-      }
       next(e);
     }
   }
