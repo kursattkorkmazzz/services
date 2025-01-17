@@ -1,14 +1,22 @@
 import User from "@/database/models/User";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
-import { InferAttributes } from "sequelize";
+import { ValidationError } from "sequelize";
 import {
   UserCreateOptions,
   UserPasswordUpdateOptions,
   UserUpdateOptions,
 } from "./UserControllerTypes";
+import Role from "@/database/models/Role";
+import PasswordBasedAuth from "@/database/models/authentication_types/PasswordBasedAuth";
+import { SEQUELIZE_DATABASE } from "@/database/Database";
+import RoleController from "../role-controller/RoleController";
 
 export default class UserController {
+  public static staticUserIdList: string[] = [
+    "cd0acd8e-228a-4a43-938f-858980eba621", // Yönetici
+  ];
+
   /**
    * Retrieves a user by their unique identifier.
    *
@@ -18,7 +26,9 @@ export default class UserController {
    */
   public static async GetUserById(id: string): Promise<User> {
     try {
-      const user = await User.findByPk(id);
+      const user = await User.findByPk(id, {
+        include: [Role, PasswordBasedAuth],
+      });
       if (!user) {
         throw MyError.createError(MyErrorTypes.USER_NOT_FOUND);
       }
@@ -36,12 +46,42 @@ export default class UserController {
    * @throws Will throw an error if the user creation fails.
    */
   public static async CreateUser(userInfo: UserCreateOptions): Promise<User> {
+    const t = await SEQUELIZE_DATABASE.transaction();
     try {
-      const user = await User.create({
-        ...userInfo,
-      });
+      const { username, password, ...otherUserInfo } = userInfo;
+      const user = await User.create(
+        {
+          ...otherUserInfo,
+        },
+        { transaction: t }
+      );
+      await PasswordBasedAuth.create(
+        {
+          username,
+          password,
+          user_id: user.id,
+        },
+        { transaction: t }
+      );
+
+      await t.commit();
+      await RoleController.AddRoleToUser(
+        user.id,
+        "b3cf85b7-4995-43fc-9790-58c032b27ab6"
+      );
       return user;
     } catch (e) {
+      await t.rollback();
+      if (e instanceof ValidationError) {
+        if (e.errors[0].type == "unique violation") {
+          switch (e.errors[0].path) {
+            case "username":
+              throw MyError.createError(MyErrorTypes.USERNAME_ALREADY_EXIST);
+            case "email":
+              throw MyError.createError(MyErrorTypes.EMAIL_ALREADY_EXIST);
+          }
+        }
+      }
       throw e;
     }
   }
@@ -53,18 +93,29 @@ export default class UserController {
    * @returns A promise that resolves when all users have been deleted.
    * @throws Will throw an error if the deletion process fails.
    */
-  public static async DeleteUsersByIds(ids: string[]): Promise<void> {
+  public static async DeleteUsersById(id: string): Promise<void> {
+    if (this.staticUserIdList.includes(id)) {
+      throw MyError.createError(MyErrorTypes.CANNOT_DELETE_ADMIN_USER);
+    }
+    const t = await SEQUELIZE_DATABASE.transaction();
     try {
-      await Promise.all(
-        ids.map(async (id) => {
-          await User.destroy({
-            where: {
-              id: ids,
-            },
-          });
-        })
-      );
+      await PasswordBasedAuth.destroy({
+        where: {
+          user_id: id,
+        },
+        transaction: t,
+      });
+
+      await User.destroy({
+        where: {
+          id: id,
+        },
+        transaction: t,
+      });
+
+      t.commit();
     } catch (e) {
+      t.rollback();
       throw e;
     }
   }
@@ -121,14 +172,16 @@ export default class UserController {
     limit?: number
   ): Promise<{ userList: User[]; totalCount: number }> {
     try {
-      let offset = undefined;
+      const Paginagiton: any = {};
+
       if (limit && page) {
-        offset = (page - 1) * limit;
+        Paginagiton["offset"] = (page - 1) * limit;
+        Paginagiton["limit"] = limit;
       }
 
       const users = await User.findAll({
-        offset,
-        limit: limit,
+        ...Paginagiton,
+        include: Role,
       });
 
       const totalUserCount = await User.count();

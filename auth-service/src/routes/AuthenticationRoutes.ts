@@ -2,6 +2,7 @@ import AuthenticationController from "@/controllers/AuthenticationController";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
 import { jwtDecode } from "@/utils/jwt";
+import Logger from "@/utils/logger";
 import MyResponse from "@/utils/response/MyResponse";
 import express, { NextFunction, Request, Response } from "express";
 import { JsonWebTokenError } from "jsonwebtoken";
@@ -68,6 +69,7 @@ AuthenticationRoute.post(
 
       if (auth_type == "password") {
         const { username, password } = req.body;
+
         if (!password) {
           res
             .status(400)
@@ -185,9 +187,11 @@ AuthenticationRoute.post(
       const status = await AuthenticationController.CheckIsTokenExistAndValid(
         access_token
       );
-      if (status) {
+      if (status.valid) {
         res.status(200).json(MyResponse.createResponse({ status: "valid" }));
-      } else {
+      } else if (status.expired) {
+        res.status(401).json(MyResponse.createResponse({ status: "expired" }));
+      } else if (status.notFound) {
         res.status(401).json(MyResponse.createResponse({ status: "invalid" }));
       }
     } catch (e) {

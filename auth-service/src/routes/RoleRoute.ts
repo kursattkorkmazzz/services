@@ -2,6 +2,7 @@ import RoleController from "@/controllers/role-controller/RoleController";
 import authorizationMiddleware from "@/middleware/authorization-middleware";
 import MyError from "@/utils/error/MyError";
 import MyErrorTypes from "@/utils/error/MyErrorTypes";
+import Logger from "@/utils/logger";
 import MyPagingResponse from "@/utils/response/MyPagingResponse";
 import MyResponse, { MyResponseTypes } from "@/utils/response/MyResponse";
 import express from "express";
@@ -25,6 +26,35 @@ RoleRoute.get(
             pageSize: Number(limit),
             total: roles.totalCount,
             roles: roles.roleList,
+          },
+          null
+        )
+      );
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+RoleRoute.get(
+  "/permissions",
+  authorizationMiddleware("role:read"),
+  async (req, res, next) => {
+    try {
+      const { page, limit } = req.query;
+
+      const permissions = await RoleController.GetAllPermissions(
+        Number(page),
+        Number(limit)
+      );
+
+      res.status(200).send(
+        MyPagingResponse.createPagingResponse(
+          {
+            page: Number(page),
+            pageSize: Number(limit),
+            total: permissions.totalCount,
+            permissions: permissions.permissionsList,
           },
           null
         )

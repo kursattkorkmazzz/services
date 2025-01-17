@@ -1,7 +1,10 @@
 import { SEQUELIZE_DATABASE } from "@/database/Database";
 import { DataTypes, Model } from "sequelize";
 
-export default class UserRole extends Model {}
+export default class UserRole extends Model {
+  declare role_id?: string;
+  declare user_id?: string;
+}
 
 UserRole.init(
   {

@@ -11,11 +11,11 @@ export const SEQUELIZE_DATABASE = new Sequelize({
   schema: process.env.DB_SCHEMA,
   logging: false,
   define: {
-    paranoid: true,
+    paranoid: false,
     timestamps: true,
     createdAt: "created_at",
-    deletedAt: "deleted_at",
     updatedAt: "updated_at",
+    deletedAt: false,
     underscored: true,
     charset: "utf8",
     schema: process.env.DB_SCHEMA,
