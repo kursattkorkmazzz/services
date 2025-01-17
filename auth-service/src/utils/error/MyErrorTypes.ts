@@ -7,6 +7,7 @@ enum MyErrorTypes {
   ACCESS_TOKEN_NOT_FOUND = "Access token not found.",
   REFRESH_TOKEN_NOT_FOUND = "Refresh token not found.",
   USER_NOT_LOGGED_IN = "User is not logged in.",
+  TOKEN_EXPIRED = "Token expired.",
 
   // User Errors
   USER_ALREADY_EXISTS = "User already exists.",

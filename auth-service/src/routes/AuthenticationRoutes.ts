@@ -187,9 +187,11 @@ AuthenticationRoute.post(
       const status = await AuthenticationController.CheckIsTokenExistAndValid(
         access_token
       );
-      if (status) {
+      if (status.valid) {
         res.status(200).json(MyResponse.createResponse({ status: "valid" }));
-      } else {
+      } else if (status.expired) {
+        res.status(401).json(MyResponse.createResponse({ status: "expired" }));
+      } else if (status.notFound) {
         res.status(401).json(MyResponse.createResponse({ status: "invalid" }));
       }
     } catch (e) {

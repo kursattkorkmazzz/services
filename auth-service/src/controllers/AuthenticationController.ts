@@ -125,17 +125,7 @@ export default class AuthenticationController {
    */
   public static async Logout(user_id: string): Promise<void> {
     try {
-      const access_token_list = await Token.findAll({
-        where: {
-          user_id: user_id,
-        },
-      });
-
-      Promise.all(
-        access_token_list.map(async (token) => {
-          await token.destroy({ force: true });
-        })
-      );
+      await this.DeleteTokenPairsByUserId(user_id);
     } catch (e) {
       throw e;
     }
@@ -159,12 +149,20 @@ export default class AuthenticationController {
         throw MyError.createError(MyErrorTypes.REFRESH_TOKEN_NOT_FOUND);
       }
       const isTokenExist = await this.CheckIsTokenExistAndValid(refresh_token);
-      if (!isTokenExist) {
-        this.DeleteTokenPairsByUserId(user_id);
+      if (isTokenExist.notFound) {
+        await this.DeleteTokenPairsByUserId(user_id);
         throw MyError.createError(MyErrorTypes.REFRESH_TOKEN_NOT_FOUND);
+      } else if (isTokenExist.expired) {
+        await this.DeleteTokenPairsByUserId(user_id);
+        throw MyError.createError(MyErrorTypes.TOKEN_EXPIRED);
+      } else if (isTokenExist.valid) {
+        const new_access_token = await this.CreateAccessToken(user_id);
+        return new_access_token;
       }
-      const new_access_token = await this.CreateAccessToken(user_id);
-      return new_access_token;
+      throw MyError.createError(
+        MyErrorTypes.UNKNOWN,
+        "Refresh Access Token - Unknown Error"
+      );
     } catch (e) {
       throw e;
     }
@@ -284,7 +282,7 @@ export default class AuthenticationController {
    */
   public static async CheckIsTokenExistAndValid(
     token: string
-  ): Promise<boolean> {
+  ): Promise<{ notFound: boolean; expired: boolean; valid: boolean }> {
     try {
       const tokenData: Token | null = await Token.findOne({
         where: {
@@ -292,16 +290,16 @@ export default class AuthenticationController {
         },
       });
       if (!tokenData) {
-        return false;
+        return { notFound: true, expired: false, valid: false };
       }
 
       const expiresAtDate = new Date(tokenData.expires_at);
 
       if (expiresAtDate < new Date(Date.now())) {
-        return false;
+        return { notFound: false, expired: true, valid: false };
       }
 
-      return true;
+      return { valid: true, notFound: false, expired: false };
     } catch (e) {
       throw e;
     }
