@@ -9,6 +9,7 @@ import {
 } from "sequelize";
 import { SEQUELIZE_DATABASE } from "../Database";
 import Category from "./Category";
+import ProductImage from "./ProductImage";
 
 export default class Product extends Model<
   InferAttributes<Product>,
@@ -18,7 +19,6 @@ export default class Product extends Model<
   declare name: string;
   declare base_price: number;
   declare description: string | null;
-  declare image_urls: string[] | null;
   declare addCategory: BelongsToManyAddAssociationMixin<Category, string>;
   declare getCategories: BelongsToManyGetAssociationsMixin<Category>;
 }
@@ -45,11 +45,6 @@ Product.init(
       type: DataTypes.TEXT,
       defaultValue: null,
       allowNull: true,
-    },
-    image_urls: {
-      type: DataTypes.ARRAY(DataTypes.TEXT),
-      allowNull: true,
-      defaultValue: null,
     },
   },
   {

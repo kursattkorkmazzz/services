@@ -1,11 +1,17 @@
 import {
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyRemoveAssociationMixin,
+  BelongsToManyRemoveAssociationsMixin,
   CreationOptional,
   DataTypes,
   InferAttributes,
   InferCreationAttributes,
   Model,
+  NonAttribute,
 } from "sequelize";
 import { SEQUELIZE_DATABASE } from "../Database";
+import Attribute from "./Attribute";
 
 export default class Category extends Model<
   InferAttributes<Category>,
@@ -13,7 +19,19 @@ export default class Category extends Model<
 > {
   declare id: CreationOptional<string>;
   declare name: string;
-  declare sub_category: string | null;
+  declare parent_category_id: CreationOptional<string>;
+
+  declare addAttribute: BelongsToManyAddAssociationMixin<Attribute, string>;
+  declare getAttributes: BelongsToManyGetAssociationsMixin<Attribute>;
+  declare removeAttribute: BelongsToManyRemoveAssociationMixin<
+    Attribute,
+    string
+  >;
+  declare removeAttributes: BelongsToManyRemoveAssociationsMixin<
+    Attribute,
+    string
+  >;
+  declare child_categories: NonAttribute<Category[]>;
 }
 
 Category.init(
@@ -28,7 +46,7 @@ Category.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    sub_category: {
+    parent_category_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },

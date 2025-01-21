@@ -10,6 +10,7 @@ import { BaseError, DatabaseError } from "sequelize";
 import sendError from "./utils/send-error";
 import MyErrorTypes from "./utils/error/MyErrorTypes";
 import ProductRouter from "./routers/product-route/ProductRouter";
+import CategoryRouter from "./routers/category-route/CategoryRouter";
 
 const port: number = process.env.PORT ? parseInt(process.env.PORT) : 3000; // default port to listen
 const app = express();
@@ -23,6 +24,7 @@ const app = express();
   app.use(express.json());
 
   app.use("/product-service/product", ProductRouter);
+  app.use("/product-service/category", CategoryRouter);
 
   // Default error handler.
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
