@@ -7,7 +7,7 @@ import {
   BelongsToManyGetAssociationsMixin,
   CreationOptional,
 } from "sequelize";
-import { SEQUELIZE_DATABASE } from "../Database";
+import { SEQUELIZE_DATABASE } from "@/commons/database/Database";
 import Category from "./Category";
 import ProductImage from "./ProductImage";
 
@@ -51,5 +51,7 @@ Product.init(
     sequelize: SEQUELIZE_DATABASE,
     paranoid: false,
     tableName: "ProductTable",
+    schema: "product",
+    timestamps: false,
   }
 );

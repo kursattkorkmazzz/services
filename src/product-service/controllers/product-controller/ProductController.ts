@@ -1,17 +1,16 @@
-import Logger from "@/utils/logger";
 import {
   ProductCreateOptions,
   ProductUpdateOptions,
 } from "./ProductControllerTypes";
-import Product from "@/database/models/Product";
-import Category from "@/database/models/Category";
+import Product from "@/product-service/models/Product";
+import Category from "@/product-service/models/Category";
 import CategoryController from "../categrory-controller/CategoryController";
-import MyError from "@/utils/error/MyError";
-import MyErrorTypes from "@/utils/error/MyErrorTypes";
-import ProductCategory from "@/database/junctions/ProductCategory";
-import GetRowsByPagination from "@/utils/database/func/GetRowsByPagination";
-import ProductImage from "@/database/models/ProductImage";
-import { SEQUELIZE_DATABASE } from "@/database/Database";
+
+import ProductCategory from "@/product-service/models/junctions/ProductCategory";
+import GetRowsByPagination from "@/product-service/utils/get-rows-by-pagination";
+import ProductImage from "@/product-service/models/ProductImage";
+import { SEQUELIZE_DATABASE } from "@/commons/database/Database";
+import CreateError from "@/product-service/utils/product-error-types";
 
 export default class ProductController {
   public static async CreateProduct(
@@ -44,7 +43,7 @@ export default class ProductController {
       // Create new product.
       const product = await ProductController.isProductExist(product_id);
       if (!product) {
-        throw MyError.createError(MyErrorTypes.PRODUCT_NOT_FOUND);
+        throw CreateError("PRODUCT_NOT_FOUND");
       }
 
       await product.reload({
@@ -116,7 +115,7 @@ export default class ProductController {
       // Create new product.
       const product = await ProductController.isProductExist(product_id);
       if (!product) {
-        throw MyError.createError(MyErrorTypes.PRODUCT_NOT_FOUND);
+        throw CreateError("PRODUCT_NOT_FOUND");
       }
       return await product.destroy({ force: true });
     } catch (e) {
@@ -131,7 +130,7 @@ export default class ProductController {
       // Create new product.
       const product = await ProductController.isProductExist(product_id);
       if (!product) {
-        throw MyError.createError(MyErrorTypes.PRODUCT_NOT_FOUND);
+        throw CreateError("PRODUCT_NOT_FOUND");
       }
 
       await product.update(new_values);
@@ -167,10 +166,10 @@ export default class ProductController {
       );
       const isProductExist = await ProductController.isProductExist(product_id);
       if (!isCategoryExist) {
-        throw MyError.createError(MyErrorTypes.CATEGORY_NOT_FOUND);
+        throw CreateError("CATEGORY_NOT_FOUND");
       }
       if (!isProductExist) {
-        throw MyError.createError(MyErrorTypes.PRODUCT_NOT_FOUND);
+        throw CreateError("PRODUCT_NOT_FOUND");
       }
 
       const productCategory = await ProductCategory.create({
@@ -189,17 +188,17 @@ export default class ProductController {
   ): Promise<number> {
     try {
       if (CategoryController.defaultCategory === category_id) {
-        throw MyError.createError(MyErrorTypes.DEFAULT_CATEGORY_CANNOT_DELETE);
+        throw CreateError("DEFAULT_CATEGORY_CANNOT_DELETE");
       }
       const isCategoryExist = await CategoryController.isCategoryExist(
         category_id
       );
       const isProductExist = await ProductController.isProductExist(product_id);
       if (!isCategoryExist) {
-        throw MyError.createError(MyErrorTypes.CATEGORY_NOT_FOUND);
+        throw CreateError("CATEGORY_NOT_FOUND");
       }
       if (!isProductExist) {
-        throw MyError.createError(MyErrorTypes.PRODUCT_NOT_FOUND);
+        throw CreateError("PRODUCT_NOT_FOUND");
       }
 
       const deletedPCcount = await ProductCategory.destroy({
@@ -217,7 +216,7 @@ export default class ProductController {
     try {
       const isProductExist = await ProductController.isProductExist(product_id);
       if (!isProductExist) {
-        throw MyError.createError(MyErrorTypes.PRODUCT_NOT_FOUND);
+        throw CreateError("PRODUCT_NOT_FOUND");
       }
       const productCategory = await ProductCategory.create({
         category_id: CategoryController.defaultCategory,
@@ -236,7 +235,7 @@ export default class ProductController {
     try {
       const product = await this.isProductExist(product_id);
       if (!product) {
-        throw MyError.createError(MyErrorTypes.PRODUCT_NOT_FOUND);
+        throw CreateError("PRODUCT_NOT_FOUND");
       }
 
       const productImage = await ProductImage.create({
@@ -253,7 +252,7 @@ export default class ProductController {
     try {
       const productImage = await ProductImage.findByPk(image_id);
       if (!productImage) {
-        throw MyError.createError(MyErrorTypes.IMAGE_NOT_FOUND);
+        throw CreateError("IMAGE_NOT_FOUND");
       }
       await productImage.destroy();
     } catch (e) {

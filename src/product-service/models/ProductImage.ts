@@ -5,7 +5,7 @@ import {
   InferCreationAttributes,
   CreationOptional,
 } from "sequelize";
-import { SEQUELIZE_DATABASE } from "../Database";
+import { SEQUELIZE_DATABASE } from "@/commons/database/Database";
 
 export default class ProductImage extends Model<
   InferAttributes<ProductImage>,
@@ -37,6 +37,8 @@ ProductImage.init(
   {
     sequelize: SEQUELIZE_DATABASE,
     paranoid: false,
+    timestamps: false,
     tableName: "ProductImageTable",
+    schema: "product",
   }
 );

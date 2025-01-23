@@ -10,7 +10,7 @@ import {
   Model,
   NonAttribute,
 } from "sequelize";
-import { SEQUELIZE_DATABASE } from "../Database";
+import { SEQUELIZE_DATABASE } from "@/commons/database/Database";
 import Attribute from "./Attribute";
 
 export default class Category extends Model<
@@ -54,5 +54,8 @@ Category.init(
   {
     sequelize: SEQUELIZE_DATABASE,
     tableName: "CategoryTable",
+    schema: "product",
+    paranoid: false,
+    timestamps: false,
   }
 );

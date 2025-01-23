@@ -4,9 +4,9 @@ import {
   InferCreationAttributes,
   Model,
 } from "sequelize";
-import { SEQUELIZE_DATABASE } from "../Database";
-import Product from "../models/Product";
-import Category from "../models/Category";
+import { SEQUELIZE_DATABASE } from "@/commons/database/Database";
+import Product from "../Product";
+import Category from "../Category";
 
 export default class ProductCategory extends Model<
   InferAttributes<ProductCategory>,
@@ -40,5 +40,8 @@ ProductCategory.init(
   {
     sequelize: SEQUELIZE_DATABASE,
     tableName: "ProductCategoryTable",
+    schema: "product",
+    paranoid: false,
+    timestamps: false,
   }
 );

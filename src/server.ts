@@ -11,6 +11,9 @@ import AuthorizationRoute from "./auth-service/routes/AuthorizationRoutes";
 import RoleRoute from "./auth-service/routes/RoleRoute";
 import UserRoute from "./auth-service/routes/UserRoutes";
 import MyError from "./commons/utils/error/MyError";
+import ProductServiceDefineAssociation from "./product-service/utils/database-association";
+import ProductRouter from "./product-service/routers/product-route/ProductRouter";
+import CategoryRouter from "./product-service/routers/category-route/CategoryRouter";
 
 const port: number = process.env.PORT ? parseInt(process.env.PORT) : 3000; // default port to listen
 const app = express();
@@ -19,6 +22,7 @@ const app = express();
 (async () => {
   // Database initialization and testing
   await AuthenticationServiceDefineAssociation();
+  await ProductServiceDefineAssociation();
 
   app.use(express.json());
   app.use(
@@ -27,10 +31,15 @@ const app = express();
     })
   );
 
+  // Authentication Service Routers
   app.use("/authn", AuthenticationRoute);
   app.use("/authz", AuthorizationRoute);
   app.use("/role-service", RoleRoute);
   app.use("/user-service", UserRoute);
+
+  // Product Service Routers
+  app.use("/product-service/product", ProductRouter);
+  app.use("/product-service/category", CategoryRouter);
 
   // Default error handler.
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

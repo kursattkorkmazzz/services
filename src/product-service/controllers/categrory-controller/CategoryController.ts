@@ -1,11 +1,11 @@
-import Category from "@/database/models/Category";
-import MyError from "@/utils/error/MyError";
-import MyErrorTypes from "@/utils/error/MyErrorTypes";
+import Category from "@/product-service/models/Category";
+
 import {
   CategoryCreateOptions,
   CategoryUpdateOptions,
 } from "./CategoryControllerTypes";
 import { InferAttributes } from "sequelize";
+import CreateError from "@/product-service/utils/product-error-types";
 
 export default class CategoryController {
   static defaultCategory: string = "88be3acc-7573-491e-8a71-10b104769c6c";
@@ -33,7 +33,7 @@ export default class CategoryController {
       // Create new category.
       const category = await CategoryController.isCategoryExist(category_id);
       if (!category) {
-        throw MyError.createError(MyErrorTypes.CATEGORY_NOT_FOUND);
+        throw CreateError("CATEGORY_NOT_FOUND");
       }
 
       await category.reload({
@@ -80,11 +80,11 @@ export default class CategoryController {
     try {
       // Create new product.
       if (this.defaultCategory === category_id) {
-        throw MyError.createError(MyErrorTypes.DEFAULT_CATEGORY_CANNOT_DELETE);
+        throw CreateError("DEFAULT_CATEGORY_CANNOT_DELETE");
       }
       const category = await CategoryController.isCategoryExist(category_id);
       if (!category) {
-        throw MyError.createError(MyErrorTypes.CATEGORY_NOT_FOUND);
+        throw CreateError("CATEGORY_NOT_FOUND");
       }
       return await category.destroy({ force: true });
     } catch (e) {
@@ -99,7 +99,7 @@ export default class CategoryController {
       // Create new category.
       const category = await CategoryController.isCategoryExist(category_id);
       if (!category) {
-        throw MyError.createError(MyErrorTypes.CATEGORY_NOT_FOUND);
+        throw CreateError("CATEGORY_NOT_FOUND");
       }
 
       await category.update(new_values);
@@ -129,7 +129,7 @@ export default class CategoryController {
         },
       });
       if (!rootCategory) {
-        throw MyError.createError(MyErrorTypes.CATEGORY_NOT_FOUND);
+        throw CreateError("CATEGORY_NOT_FOUND");
       }
 
       const childrens = await Promise.all(

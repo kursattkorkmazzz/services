@@ -1,29 +1,26 @@
-import Logger from "../utils/logger";
 import MyResponse from "../utils/response/MyResponse";
 import axios from "axios";
 import { NextFunction, Request, Response } from "express";
-import http from "http";
+import MyError from "../utils/error/MyError";
+import { CreateError } from "../utils/error/ CommonErrorTypes";
+
+const AUTH_SERVICE_URI = "http://localhost";
+const AUTH_SERVICE_PORT = "4000";
+
 export default function authorizationMiddleware(permission_code: string) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const access_token = req.headers["authorization"]?.split(" ")[1];
 
       if (!access_token) {
-        res
-          .status(401)
-          .send(
-            MyResponse.createResponse(
-              null,
-              "You have to provide access token in authorization header with bearer."
-            )
-          );
+        MyError.sendMyError(CreateError("ACCESS_TOKEN_NOT_FOUND"), res, 400);
         return;
       }
 
       // Checking the permission.
 
       const result = await axios.post(
-        "http://localhost:3000/authz/check-permission",
+        `${AUTH_SERVICE_URI}:${AUTH_SERVICE_PORT}/authz/check-permission`,
         {
           operation_code: permission_code, // veya  tek elemanlı kontrol: "user:create"
         },
@@ -36,14 +33,7 @@ export default function authorizationMiddleware(permission_code: string) {
       );
 
       if (result.data.data.access !== "granted") {
-        res
-          .status(403)
-          .send(
-            MyResponse.createResponse(
-              null,
-              "You don't have permission to access this resource."
-            )
-          );
+        MyError.sendMyError(CreateError("PERMISSON_DENIED"), res, 403);
         return;
       }
       next();

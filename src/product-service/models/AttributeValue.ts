@@ -5,7 +5,8 @@ import {
   InferCreationAttributes,
   Model,
 } from "sequelize";
-import { SEQUELIZE_DATABASE } from "../Database";
+import { SEQUELIZE_DATABASE } from "@/commons/database/Database";
+
 import Attribute from "./Attribute";
 import Product from "./Product";
 
@@ -56,5 +57,8 @@ AttributeValue.init(
   {
     sequelize: SEQUELIZE_DATABASE,
     tableName: "AttributeValueTable",
+    schema: "product",
+    paranoid: false,
+    timestamps: false,
   }
 );

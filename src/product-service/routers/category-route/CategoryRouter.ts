@@ -1,4 +1,4 @@
-import BodyValidation from "@/utils/request-validation/BodyValidation";
+import BodyValidation from "@/commons/utils/request-validation/BodyValidation";
 import express, { NextFunction, Request, Response } from "express";
 import {
   AttributeCreateBodySchema,
@@ -8,19 +8,20 @@ import {
   CategoryGetIdParamsSchema,
   CategoryUpdateBodySchema,
 } from "./CategorySchemas";
-import MyResponse, { MyResponseTypes } from "@/utils/response/MyResponse";
-import ParamValidation from "@/utils/request-validation/ParamValidation";
-import MyPagingResponse from "@/utils/response/MyPagingResponse";
-import CategoryController from "@/controllers/categrory-controller/CategoryController";
+import MyResponse from "@/commons/utils/response/MyResponse";
+import ParamValidation from "@/commons/utils/request-validation/ParamValidation";
+import MyPagingResponse from "@/commons/utils/response/MyPagingResponse";
+import CategoryController from "@/product-service/controllers/categrory-controller/CategoryController";
+import AttributeController from "@/product-service/controllers/attribute-controller/AttributeController";
 import {
   CategoryCreateOptions,
   CategoryUpdateOptions,
-} from "@/controllers/categrory-controller/CategoryControllerTypes";
-import AttributeController from "@/controllers/attribute-controller/AttributeController";
+} from "@/product-service/controllers/categrory-controller/CategoryControllerTypes";
 import {
   AttributeCreateOptions,
   AttributeUpdateOptions,
-} from "@/controllers/attribute-controller/AttributeControllerTypes";
+} from "@/product-service/controllers/attribute-controller/AttributeControllerTypes";
+
 const CategoryRouter = express.Router();
 
 // #region GET OEPRATIONS
@@ -91,7 +92,7 @@ CategoryRouter.delete(
       const category_id = req.params.category_id;
       // Call ProductController.CreateProduct method with props.
       await CategoryController.DeleteCategoryById(category_id);
-      res.status(200).send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
+      res.status(200).send(MyResponse.createSuccessResponse());
     } catch (err) {
       next(err);
     }
@@ -185,7 +186,7 @@ CategoryRouter.delete(
         category_id,
         attribute_id
       );
-      res.status(200).send(MyResponse.createResponse(MyResponseTypes.SUCCESS));
+      res.status(200).send(MyResponse.createSuccessResponse());
     } catch (err) {
       next(err);
     }

@@ -11,14 +11,8 @@ export const SEQUELIZE_DATABASE = new Sequelize({
   schema: process.env.DB_SCHEMA,
   logging: false,
   define: {
-    paranoid: false,
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-    deletedAt: false,
     underscored: true,
     charset: "utf8",
-    // TODO schema: process.env.DB_SCHEMA,
   },
 });
 

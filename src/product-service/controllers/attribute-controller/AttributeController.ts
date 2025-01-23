@@ -1,13 +1,13 @@
-import Attribute from "@/database/models/Attribute";
+import Attribute from "@/product-service/models/Attribute";
 
 import CategoryController from "../categrory-controller/CategoryController";
-import MyError from "@/utils/error/MyError";
-import MyErrorTypes from "@/utils/error/MyErrorTypes";
+
 import {
   AttributeCreateOptions,
   AttributeUpdateOptions,
 } from "./AttributeControllerTypes";
-import { SEQUELIZE_DATABASE } from "@/database/Database";
+import { SEQUELIZE_DATABASE } from "@/commons/database/Database";
+import CreateError from "@/product-service/utils/product-error-types";
 
 export default class AttributeController {
   public static async CreateAttribute(
@@ -18,7 +18,7 @@ export default class AttributeController {
     try {
       const category = await CategoryController.isCategoryExist(category_id);
       if (!category) {
-        throw MyError.createError(MyErrorTypes.CATEGORY_NOT_FOUND);
+        throw CreateError("CATEGORY_NOT_FOUND");
       }
       const newAttribute = await Attribute.create(new_values, {
         transaction: t,
@@ -38,7 +38,7 @@ export default class AttributeController {
     try {
       const category = await CategoryController.isCategoryExist(category_id);
       if (!category) {
-        throw MyError.createError(MyErrorTypes.CATEGORY_NOT_FOUND);
+        throw CreateError("CATEGORY_NOT_FOUND");
       }
       const attributes = await category.getAttributes({
         joinTableAttributes: [],
@@ -56,11 +56,11 @@ export default class AttributeController {
     try {
       const category = await CategoryController.isCategoryExist(category_id);
       if (!category) {
-        throw MyError.createError(MyErrorTypes.CATEGORY_NOT_FOUND);
+        throw CreateError("CATEGORY_NOT_FOUND");
       }
 
       const attributes = await category.getAttributes();
-      const attribute = attributes.find((a) => a.id === attribute_id);
+      const attribute = attributes.find((a: any) => a.id === attribute_id);
       await category.removeAttribute(attribute);
       if (attribute) {
         await attribute.destroy({ force: true });
@@ -77,7 +77,7 @@ export default class AttributeController {
     try {
       const attribute = await Attribute.findByPk(attribute_id);
       if (!attribute) {
-        throw MyError.createError(MyErrorTypes.ATTRIBUTE_NOT_FOUND);
+        throw CreateError("ATTRIBUTE_NOT_FOUND");
       }
       await attribute.update(new_values);
       return attribute;

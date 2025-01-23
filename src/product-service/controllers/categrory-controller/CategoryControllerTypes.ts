@@ -1,5 +1,4 @@
-import Attribute from "@/database/models/Attribute";
-import Category from "@/database/models/Category";
+import Category from "@/product-service/models/Category";
 import { InferAttributes } from "sequelize";
 
 export type CategoryCreateOptions = Omit<InferAttributes<Category>, "id">;

@@ -1,7 +1,7 @@
 import {
   ProductCreateOptions,
   ProductUpdateOptions,
-} from "@/controllers/product-controller/ProductControllerTypes";
+} from "@/product-service/controllers/product-controller/ProductControllerTypes";
 import Z, { number } from "Zod";
 
 // BODY SCHEMA

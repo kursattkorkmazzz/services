@@ -69,5 +69,5 @@ export default async function AuthenticationServiceDefineAssociation() {
 
 async function DatabaseSync() {
   await SEQUELIZE_DATABASE.sync({ alter: true });
-  Logger.info("Database syncronized successfully.");
+  Logger.info("Authentication service models syncronized successfully.");
 }

@@ -1,12 +1,11 @@
 import {
   AttributeCreateOptions,
   AttributeUpdateOptions,
-} from "@/controllers/attribute-controller/AttributeControllerTypes";
+} from "@/product-service/controllers/attribute-controller/AttributeControllerTypes";
 import {
   CategoryCreateOptions,
   CategoryUpdateOptions,
-} from "@/controllers/categrory-controller/CategoryControllerTypes";
-
+} from "@/product-service/controllers/categrory-controller/CategoryControllerTypes";
 import Z from "Zod";
 
 // BODY SCHEMA

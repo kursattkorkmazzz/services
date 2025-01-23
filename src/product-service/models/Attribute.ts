@@ -5,7 +5,7 @@ import {
   InferCreationAttributes,
   Model,
 } from "sequelize";
-import { SEQUELIZE_DATABASE } from "../Database";
+import { SEQUELIZE_DATABASE } from "@/commons/database/Database";
 
 export default class Attribute extends Model<
   InferAttributes<Attribute>,
@@ -31,5 +31,8 @@ Attribute.init(
   {
     sequelize: SEQUELIZE_DATABASE,
     tableName: "AttributeTable",
+    schema: "product",
+    paranoid: false,
+    timestamps: false,
   }
 );
